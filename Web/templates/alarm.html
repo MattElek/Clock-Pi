@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<head>
+	<title>Alarm Control</title>
+	<link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+  <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+  <link rel="mask-icon" href="{{ url_for('static', filename='safari-pinned-tab.svg') }}" color="#000000">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <meta name="msapplication-config" content="{{ url_for('static', filename='browserconfig.xml') }}">
+  <meta name="theme-color" content="#ffffff">
+	<script>
+	function myFunction() {
+		var i = document.createElement("input");
+		i.setAttribute("type", "time");
+		var stuff = i.type !== "text";
+
+		var foo = document.getElementById("browser_specific_input");
+
+		if(stuff == true) {
+			var element = document.createElement("input");
+			element.name = "usr_time";
+			element.type = "time";
+			foo.appendChild(element);
+		} else {
+			var result = document.createElement("span");
+			var hours = document.createElement("select");
+			hours.name = "hour"
+			hours.setAttribute("id", "hour");
+			for (var h=1; h<25; h++) {
+				var option = document.createElement("option");
+				option.setAttribute("value", h);
+				option.appendChild(document.createTextNode(h));
+				hours.appendChild(option);
+			}
+			var minutes = document.createElement("select");
+			minutes.setAttribute("name", "minute")
+			minutes.setAttribute("id", "minute");
+			for (var m=0; m<60; m++) {
+				var option = document.createElement("option");
+				option.setAttribute("value", m);
+				option.appendChild(document.createTextNode(m));
+				minutes.appendChild(option);
+			}
+			result.appendChild(hours);
+			result.appendChild(document.createTextNode(" : "));
+			result.appendChild(minutes);
+			foo.appendChild(result);
+		}
+	}
+	</script>
+</head>
+<body style="background-color:#181818;color:white;" link="blue" vlink="blue" alink="red" onload="myFunction()">
+	<h1>Alarm Control</h1>
+	<h2>Page last reloaded at: {{ time }} &nbsp <a href="{{ url_for('alarm_control') }}">Reload</a></h2>
+	<h3>Alarm {{ alarm_on_or_off }} {{ alarm_time }}</h3>
+	<form action="{{ url_for('alarm_control') }}" method=Post>
+		Alarm time:
+		<br>
+		<div id="browser_specific_input">
+
+		</div>
+		<br>
+		<br>
+		Alarm Set:
+		<br>
+		<input type="radio" name="on_or_off" value="1" checked> On<br>
+		<input type="radio" name="on_or_off" value="0"> Off<br>
+		<br>
+		<input type="submit">
+	</form>
+	<h4><a href="{{ url_for('control') }}">Back to control panel</a></h4>
+	<h6>For the disclaimer, click <a href="{{ url_for('disclaimer') }}">here</a></h6>
+</body>
+</html>

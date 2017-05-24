@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<head>
+	<title>Power</title>
+	<link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+	<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+	<link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+	<link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+	<link rel="mask-icon" href="{{ url_for('static', filename='safari-pinned-tab.svg') }}" color="#000000">
+	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+	<meta name="msapplication-config" content="{{ url_for('static', filename='browserconfig.xml') }}">
+	<meta name="theme-color" content="#ffffff">
+</head>
+<body style="background-color:#181818;color:white;" link="blue" vlink="blue" alink="red">
+	{% if text %}
+	<h1>{{ text }}</h1>
+	{% endif %}
+
+	{% if shutdownask %}
+	<h1>Shutdown?</h1>
+	<h3><a href="{{ url_for('control') }}">No</a> &nbsp &nbsp <a href="{{ url_for('shutdown') }}">Yes</a></h3>
+	{% endif %}
+
+	{% if rebootask %}
+	<h1>Reboot?</h1>
+	<h3><a href="{{ url_for('control') }}">No</a> &nbsp &nbsp <a href="{{ url_for('reboot') }}">Yes</a></h3>
+	{% endif %}
+
+	<br>
+	<h6>For the disclaimer, click <a href="{{ url_for('disclaimer') }}">here</a></h6>
+</body>
+</html>

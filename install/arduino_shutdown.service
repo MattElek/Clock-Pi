@@ -1,0 +1,10 @@
+[Unit]
+Description=Arduino Shutdown Button
+After=multi-user.target
+
+[Service]
+Type=idle
+ExecStart=/usr/bin/python /home/pi/Clock-Pi/arduino_shutdown.py
+
+[Install]
+WantedBy=multi-user.target
