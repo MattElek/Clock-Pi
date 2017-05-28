@@ -775,6 +775,7 @@ def main():
                         ##### Volume Up #####
                         #####################
                         if GPIO.input(SW2) == False:
+                            count = 0
                             volume_level = volume_level + 2
                             if volume_level > 100:
                                 volume_level = 100
@@ -790,6 +791,7 @@ def main():
                         ##### Volume Down #####
                         #######################
                         if GPIO.input(SW1) == False:
+                            count = 0
                             volume_level = volume_level - 2
                             if volume_level < 0:
                                 volume_level = 0

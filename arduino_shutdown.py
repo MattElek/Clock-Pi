@@ -32,6 +32,7 @@ def main():
     ##############################
     ##### Connect to Arduino #####
     ##############################
+    global board
     board = Arduino("/dev/ttyACM0")
     it = util.Iterator(board)
     it.start()
