@@ -53,6 +53,11 @@ function _spinner() {
       echo -en "${green}${on_success}${nc}"
     else
       echo -en "${red}${on_fail}${nc}"
+      echo -e "]"
+      echo ""
+      echo "Something went wrong"
+      echo ""
+      exit 1
     fi
     echo -e "]"
     ;;
@@ -139,27 +144,57 @@ apt-get clean > /dev/null 2>&1
 stop_spinner $?
 
 start_spinner "Installing apt-get Packages..."
-apt-get install bc git i2c-tools libavformat-dev libfreetype6-dev libfuse-dev libjpeg-dev libportmidi-dev libsdl-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libsmpeg-dev libswscale-dev mercurial python-dev python-imaging python-numpy python-pip python-pygame python-smbus -y > /dev/null 2>&1
+apt-get install bc git i2c-tools libavformat-dev libfreetype6-dev libfuse-dev libjpeg-dev libportmidi-dev libsdl-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libsmpeg-dev libswscale-dev python-dev python-imaging python-numpy python-pip python-pygame python-smbus -y > /dev/null 2>&1
 stop_spinner $?
 start_spinner "Installing python-pip packages..."
 pip install flask psutil pyfirmata requests > /dev/null 2>&1
-pip install hg+http://bitbucket.org/pygame/pygame > /dev/null 2>&1
 stop_spinner $?
 
 start_spinner "Installing Main Script and Web Backend..."
-rm -rf /home/pi/Clock-Pi/ > /dev/null 2>&1
 git clone https://github.com/mhar9000/Clock-Pi.git > /dev/null 2>&1
-mv -f /home/pi/Clock-Pi/install/arduino_shutdown.service /lib/systemd/system/arduino_shutdown.service
+cat > /lib/systemd/system/arduino_shutdown.service <<EOL
+[Unit]
+Description=Arduino Shutdown Button
+After=multi-user.target
+
+[Service]
+Type=idle
+ExecStart=/usr/bin/python /home/pi/Clock-Pi/arduino_shutdown.py
+
+[Install]
+WantedBy=multi-user.target
+EOL
 chmod 644 /lib/systemd/system/arduino_shutdown.service
-mv -f /home/pi/Clock-Pi/install/clock.service /lib/systemd/system/clock.service > /dev/null 2>&1
-chmod 644 /lib/systemd/system/clock.service > /dev/null 2>&1
-mv -f /home/pi/Clock-Pi/install/web.service /lib/systemd/system/web.service > /dev/null 2>&1
-chmod 644 /lib/systemd/system/web.service > /dev/null 2>&1
-systemctl daemon-reload > /dev/null 2>&1
+cat > /lib/systemd/system/clock.service <<EOL
+[Unit]
+Description=More-Than-An-Alarm-Clock Front End Script
+After=multi-user.target
+
+[Service]
+Type=idle
+ExecStart=/usr/bin/python /home/pi/Clock-Pi/Clock/clock.py
+
+[Install]
+WantedBy=multi-user.target
+EOL
+chmod 644 /lib/systemd/system/clock.service
+cat > /lib/systemd/system/web.service <<EOL
+[Unit]
+Description=More-Than-An-Alarm-Clock Web Script
+After=multi-user.target
+
+[Service]
+Type=idle
+ExecStart=/usr/bin/python /home/pi/Clock-Pi/Web/web.py
+
+[Install]
+WantedBy=multi-user.target
+EOL
+chmod 644 /lib/systemd/system/web.service
+systemctl daemon-reload
 systemctl enable arduino_shutdown.service > /dev/null 2>&1
 systemctl enable clock.service > /dev/null 2>&1
 systemctl enable web.service > /dev/null 2>&1
-rm /home/pi/Clock-Pi/README.md > /dev/null 2>&1
 rm /home/pi/Clock-Pi/Music/README.md > /dev/null 2>&1
 rm -rf /home/pi/Clock-Pi/.git > /dev/null 2>&1
 chown -R pi:pi /home/pi/Clock-Pi/ > /dev/null 2>&1
@@ -211,9 +246,100 @@ if [ "$INSTALL_HOMEKIT" = true ] ; then
   mkdir /var/lib/homebridge > /dev/null 2>&1
   chown homebridge: /var/lib/homebridge > /dev/null 2>&1
   chmod u+w /var/lib/homebridge > /dev/null 2>&1
-  mv -f /home/pi/Clock-Pi/install/config.json /var/lib/homebridge/config.json
-  mv -f /home/pi/Clock-Pi/install/homebridge.service /etc/systemd/system/homebridge.service
-  mv -f /home/pi/Clock-Pi/install/homebridge /etc/default/homebridge
+  cat > /etc/systemd/system/homebridge.service <<EOL
+[Unit]
+Description=Node.js HomeKit Server
+After=syslog.target network-online.target
+
+[Service]
+Type=simple
+User=homebridge
+EnvironmentFile=/etc/default/homebridge
+# Adapt this to your specific setup (could be /usr/bin/homebridge)
+# See comments below for more information
+ExecStart=/usr/bin/homebridge $HOMEBRIDGE_OPTS
+Restart=on-failure
+RestartSec=10
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
+EOL
+  cat > /etc/default/homebridge <<EOL
+# Defaults / Configuration options for homebridge
+# The following settings tells homebridge where to find the config.json file and where to persist the data (i.e. pairing and others)
+HOMEBRIDGE_OPTS=-U /var/lib/homebridge
+
+# If you uncomment the following line, homebridge will log more
+# You can display this via systemd's journalctl: journalctl -f -u homebridge
+# DEBUG=*
+EOL
+  cat > /etc/systemd/system/homebridge.service <<EOL
+{
+  "bridge": {
+    "name": "Clock-Pi",
+    "username": "CC:22:3D:E3:CE:30",
+    "port": 51826,
+    "pin": "031-45-154"
+  },
+
+  "description": "More-Than-An-Alarm-Clock",
+
+  "accessories": [
+  {
+    "accessory": "HTTP-RGB",
+    "name": "Pin 12",
+    "http_method": "HEAD",
+
+    "switch": {
+      "status": "http://localhost/api/info/12/",
+      "powerOn": "http://localhost/api/on/12/",
+      "powerOff": "http://localhost/api/off/12/"
+    }
+  }, {
+    "accessory": "HTTP-RGB",
+    "name": "Pin 11",
+    "http_method": "HEAD",
+
+    "switch": {
+      "status": "http://localhost/api/info/11/",
+      "powerOn": "http://localhost/api/on/11/",
+      "powerOff": "http://localhost/api/off/11/"
+    }
+  }, {
+    "accessory": "HTTP-RGB",
+    "name": "Pin 10",
+    "http_method": "HEAD",
+
+    "switch": {
+      "status": "http://localhost/api/info/10/",
+      "powerOn": "http://localhost/api/on/10/",
+      "powerOff": "http://localhost/api/off/10/"
+    }
+  }, {
+    "accessory": "HTTP-RGB",
+    "name": "Pin 9",
+    "http_method": "HEAD",
+
+    "switch": {
+      "status": "http://localhost/api/info/9/",
+      "powerOn": "http://localhost/api/on/9/",
+      "powerOff": "http://localhost/api/off/9/"
+    }
+  }, {
+    "accessory": "PiTemperature",
+    "name": "CPU Temp"
+  }, {
+    "accessory": "HttpTemperature",
+    "name": "LM75 Temp",
+    "url": "http://localhost/api/info/temperature/",
+    "http_method": "GET"
+  }
+  ],
+
+  "platforms": []
+}
+EOL
   systemctl daemon-reload > /dev/null 2>&1
   systemctl enable homebridge > /dev/null 2>&1
   stop_spinner $?
@@ -226,12 +352,16 @@ if [ "$INSTALL_NETATALK" = true ] ; then
   stop_spinner $?
 fi
 
+start_spinner "Enabling I2C and SPI"
+raspi-config nonint do_i2c 0
+raspi-config nonint do_spi 0
+stop_spinner $?
+
 start_spinner "Installing Papirus Driver..."
 git clone https://github.com/PiSupply/PaPiRus.git > /dev/null 2>&1
 cd PaPiRus > /dev/null 2>&1
 python setup.py install > /dev/null 2>&1
 rm -rf /home/pi/PaPiRus/
-rm -rf /home/pi/Clock-Pi/install/
 mkdir /tmp/papirus
 cd /tmp/papirus
 git clone https://github.com/repaper/gratis.git > /dev/null 2>&1
@@ -242,19 +372,12 @@ systemctl enable epd-fuse.service > /dev/null 2>&1
 papirus-set 2.7 > /dev/null 2>&1
 stop_spinner $?
 
-whiptail --msgbox "IMPORTANT: Enable both the SPI and the I2C interfaces!" 10 60
+whiptail --msgbox "Install sucsessful!" 10 60
 
 echo ""
-echo "##################################################################"
-echo "##### IMPORTANT: Enable both the SPI and the I2C interfaces! #####"
-echo "##################################################################"
-
-whiptail --msgbox "If everything is green and says done, the install is sucsessful!" 10 60
-
-echo ""
-echo "###########################################################################"
-echo "##### If everything is green and says done, the install is sucsessful #####"
-echo "###########################################################################"
+echo "###############################"
+echo "##### Install sucsessful! #####"
+echo "###############################"
 
 if (whiptail --yesno "Reboot now?" 15 65) then
   echo ""
@@ -264,5 +387,9 @@ if (whiptail --yesno "Reboot now?" 15 65) then
   reboot
 else
   whiptail --msgbox "You must reboot for the changes to to take effect" 10 60
+  echo ""
+  echo "#############################################################"
+  echo "##### You must reboot for the changes to to take effect #####"
+  echo "#############################################################"
   exit 0
 fi

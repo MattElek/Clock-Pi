@@ -349,7 +349,7 @@ def main():
         ################
         if GPIO.input(SW4) == False:
             display_time()
-            draw.text((2, 10), " Back  Alarm  Power  Reload", fill=BLACK, font=menu_font)
+            draw.text((2, 10), " Back  Alarm  Power", fill=BLACK, font=menu_font)
             papirus.display(image)
             papirus.update()
             count = 0
@@ -370,25 +370,68 @@ def main():
                 #################
                 if GPIO.input(SW3) == False:
                     display_time()
-                    draw.text((2, 10), " Menu   Info   Stuff   Lights", fill=BLACK, font=menu_font)
-                    if alarm_set == True:
-                        alarm_set = False
-                        with open("/home/pi/Clock-Pi/Clock/config.csv", "w") as f:
-                            f.seek(0)
-                            new_text = str(alarm_hour) + "," + str(alarm_min) + ",0"
-                            f.write(new_text)
-                        draw.text((4, 40), "Alarm off at " + str(alarm_hour) + ":" + str(alarm_min), fill=BLACK, font=menu_font)
-                    elif alarm_set == False:
-                        alarm_set = True
-                        with open("/home/pi/Clock-Pi/Clock/config.csv", "w") as f:
-                            f.seek(0)
-                            new_text = str(alarm_hour) + "," + str(alarm_min) + ",1"
-                            f.write(new_text)
-                        draw.text((4, 40), "Alarm on at " + str(alarm_hour) + ":" + str(alarm_min), fill=BLACK, font=menu_font)
+                    draw.text((2, 10), " Back   Toggle   Status", fill=BLACK, font=menu_font)
                     papirus.display(image)
                     papirus.update()
-                    break
+                    count = 0
+                    while (count < 30):
 
+                        ################
+                        ##### Back #####
+                        ################
+                        if GPIO.input(SW4) == False:
+                            display_time()
+                            draw.text((2, 10), " Back  Alarm  Power", fill=BLACK, font=menu_font)
+                            papirus.display(image)
+                            papirus.update()
+                            break
+
+                        ##################
+                        ##### Toggle #####
+                        ##################
+                        if GPIO.input(SW3) == False:
+                            display_time()
+                            draw.text((2, 10), " Menu   Info   Stuff   Lights", fill=BLACK, font=menu_font)
+                            if alarm_set == True:
+                                alarm_set = False
+                                with open("/home/pi/Clock-Pi/Clock/config.csv", "w") as f:
+                                    f.seek(0)
+                                    new_text = str(alarm_hour) + "," + str(alarm_min) + ",0"
+                                    f.write(new_text)
+                                draw.text((4, 40), "Alarm off at " + str(alarm_hour) + ":" + str(alarm_min), fill=BLACK, font=menu_font)
+                            elif alarm_set == False:
+                                alarm_set = True
+                                with open("/home/pi/Clock-Pi/Clock/config.csv", "w") as f:
+                                    f.seek(0)
+                                    new_text = str(alarm_hour) + "," + str(alarm_min) + ",1"
+                                    f.write(new_text)
+                                draw.text((4, 40), "Alarm on at " + str(alarm_hour) + ":" + str(alarm_min), fill=BLACK, font=menu_font)
+                            papirus.display(image)
+                            papirus.update()
+                            break
+
+                        ##################
+                        ##### Reload #####
+                        ##################
+                        if GPIO.input(SW2) == False:
+                            with open("/home/pi/Clock-Pi/Clock/config.csv", "r") as f:
+                                text = f.read()
+                                words = text.split(",")
+                                alarm_hour = int(words[0])
+                                alarm_min = int(words[1])
+                                alarm_set = bool(int(words[2]))
+                            display_time()
+                            draw.text((2, 10), " Menu   Info   Stuff   Lights", fill=BLACK, font=menu_font)
+                            if alarm_set == True:
+                                draw.text((4, 40), "Alarm on at " + str(alarm_hour) + ":" + str(alarm_min), fill=BLACK, font=menu_font)
+                            elif alarm_set == False:
+                                draw.text((4, 40), "Alarm off at " + str(alarm_hour) + ":" + str(alarm_min), fill=BLACK, font=menu_font)
+                            papirus.display(image)
+                            papirus.update()
+                            break
+
+                        sleep(1)
+                        count = count + 1
                 ###################
                 ###### Power ######
                 ###################
@@ -434,26 +477,6 @@ def main():
 
                         sleep(1)
                         count = count + 1
-
-                ##################
-                ##### Reload #####
-                ##################
-                if GPIO.input(SW1) == False:
-                    with open("/home/pi/Clock-Pi/Clock/config.csv", "r") as f:
-                        text = f.read()
-                        words = text.split(",")
-                        alarm_hour = int(words[0])
-                        alarm_min = int(words[1])
-                        alarm_set = bool(int(words[2]))
-                    display_time()
-                    draw.text((2, 10), " Menu   Info   Stuff   Lights", fill=BLACK, font=menu_font)
-                    if alarm_set == True:
-                        draw.text((4, 40), "Alarm on at " + str(alarm_hour) + ":" + str(alarm_min), fill=BLACK, font=menu_font)
-                    elif alarm_set == False:
-                        draw.text((4, 40), "Alarm off at " + str(alarm_hour) + ":" + str(alarm_min), fill=BLACK, font=menu_font)
-                    papirus.display(image)
-                    papirus.update()
-                    break
 
                 sleep(1)
                 count = count + 1
@@ -584,18 +607,12 @@ def main():
                             break
 
                         ###############################
-                        ##### Estimated room temp #####
+                        ##### GPU Temp #####
                         ###############################
                         if GPIO.input(SW1) == False:
-                            # Get temperature data
-                            with CPUTemp() as cpu_temp:
-                                cpu_temp_C = cpu_temp.get_temperature_in_c()
-                            cpu_temp_C = str(cpu_temp_C).split(".")[0]
-                            ambient = str(sensor.getTempC()).split(".")[0]
-                            est_temp = sensor.toFah(int(ambient) - ((int(cpu_temp_C) - int(ambient)) / 0.8))
                             display_time()
                             draw.text((2, 10), " Back   More   Temp", fill=BLACK, font=menu_font)
-                            draw.text((4, 40), "Est. room temp: " + str(est_temp) + "F", fill=BLACK, font=menu_font)
+                            draw.text((4, 40), "To be added" + str(est_temp) + "F", fill=BLACK, font=menu_font)
                             papirus.display(image)
                             papirus.update()
                             break
@@ -1338,6 +1355,7 @@ except SystemExit:
 except Exception as e:
     system("papirus-write 'An error occurred: " + str(e) +"' > /dev/null 2>&1")
     print "An error occurred: " + str(e)
+    raise SystemExit(1)
 
 finally:
     GPIO.cleanup() # this ensures a clean exit
