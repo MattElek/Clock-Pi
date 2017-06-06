@@ -24,7 +24,7 @@ It is a combination of 3 python programs, Airplay, HomeKit, and Netatalk. I adde
 I absolutely LOVE it when an install is easy and painless. I have tried very hard to create that, so here is a oneliner that I made. Copy and paste it into your Raspberry Pi terminal, hit enter, select some options, and let it do it's thing.
 
 ```Shell
-curl -sS https://raw.githubusercontent.com/mhar9000/Clock-Pi/master/install.sh | sudo bash
+curl -sSL http://bit.ly/Clock-Pi | sudo bash
 ```
 
 Wire up your relays to pins 12, 11, 10, and 9 on your arduino, with the relays that the speakers are connected to wired to pin 11. Also, if you have a nightlight or something that you want to be able to turn off automatically after 1 or 2 hours, connect it to pin 9. Connect a button to pin 4 to be used as the reboot button.
