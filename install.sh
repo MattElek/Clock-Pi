@@ -260,7 +260,7 @@ if [ "$INSTALL_HOMEKIT" = true ] ; then
   mkdir -p /var/lib/homebridge > /dev/null 2>&1
   chown homebridge: /var/lib/homebridge > /dev/null 2>&1
   chmod u+w /var/lib/homebridge > /dev/null 2>&1
-  cat > /etc/systemd/system/homebridge.service <<EOL
+  cat > /etc/systemd/system/homebridge.service <<'EOL'
 [Unit]
 Description=Node.js HomeKit Server
 After=syslog.target network-online.target
@@ -294,7 +294,7 @@ EOL
 {
   "bridge": {
     "name": "Clock-Pi",
-    "username": $mac_address,
+    "username": "$mac_address",
     "port": 51826,
     "pin": "031-45-154"
   },

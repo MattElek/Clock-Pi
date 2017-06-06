@@ -606,17 +606,6 @@ def main():
                             papirus.update()
                             break
 
-                        ###############################
-                        ##### GPU Temp #####
-                        ###############################
-                        if GPIO.input(SW1) == False:
-                            display_time()
-                            draw.text((2, 10), " Back   More   Temp", fill=BLACK, font=menu_font)
-                            draw.text((4, 40), "To be added" + str(est_temp) + "F", fill=BLACK, font=menu_font)
-                            papirus.display(image)
-                            papirus.update()
-                            break
-
                         sleep(1)
                         count = count + 1
 
