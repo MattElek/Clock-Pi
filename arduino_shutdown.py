@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 #########################################################
 ##### If button on Arduino pin 6 is pressed, reboot #####

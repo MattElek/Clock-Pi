@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 #######################################################
 ##### The main script of more-than-an-alarm-clock #####
@@ -136,7 +136,7 @@ def main():
     #################################
     ##### Create and read files #####
     #################################
-    with open("/home/pi/Clock-Pi/Clock/config.csv", "r") as f: # Read alarm file
+    with open("/home/pi/Clock-Pi/alarm_data.csv", "r") as f: # Read alarm file
         text = f.read()
         words = text.split(",")
         alarm_hour = int(words[0])
@@ -333,7 +333,7 @@ def main():
                 papirus.partial_update()
 
             if "30" == thisMin:
-                with open("/home/pi/Clock-Pi/Clock/config.csv", "r") as f:
+                with open("/home/pi/Clock-Pi/alarm_data.csv", "r") as f:
                     text = f.read()
                     words = text.split(",")
                     alarm_hour = int(words[0])
@@ -394,14 +394,14 @@ def main():
                             draw.text((2, 10), " Menu   Info   Stuff   Lights", fill=BLACK, font=menu_font)
                             if alarm_set == True:
                                 alarm_set = False
-                                with open("/home/pi/Clock-Pi/Clock/config.csv", "w") as f:
+                                with open("/home/pi/Clock-Pi/alarm_data.csv", "w") as f:
                                     f.seek(0)
                                     new_text = str(alarm_hour) + "," + str(alarm_min) + ",0"
                                     f.write(new_text)
                                 draw.text((4, 40), "Alarm off at " + str(alarm_hour) + ":" + str(alarm_min), fill=BLACK, font=menu_font)
                             elif alarm_set == False:
                                 alarm_set = True
-                                with open("/home/pi/Clock-Pi/Clock/config.csv", "w") as f:
+                                with open("/home/pi/Clock-Pi/alarm_data.csv", "w") as f:
                                     f.seek(0)
                                     new_text = str(alarm_hour) + "," + str(alarm_min) + ",1"
                                     f.write(new_text)
@@ -414,7 +414,7 @@ def main():
                         ##### Reload #####
                         ##################
                         if GPIO.input(SW2) == False:
-                            with open("/home/pi/Clock-Pi/Clock/config.csv", "r") as f:
+                            with open("/home/pi/Clock-Pi/alarm_data.csv", "r") as f:
                                 text = f.read()
                                 words = text.split(",")
                                 alarm_hour = int(words[0])

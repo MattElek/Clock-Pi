@@ -100,11 +100,11 @@ else
   whiptail --msgbox "Shairport Sync will not be installed." 10 60
 fi
 
-if (whiptail --title "HomeKit" --yesno "Do you want to install HomeBridge (HomeKit compatibility) and have it automatically run at boot?" 15 65) then
-  INSTALL_HOMEKIT=true
+if (whiptail --title "HomeBridge" --yesno "Do you want to install HomeBridge (HomeKit compatibility) and have it automatically run at boot?" 15 65) then
+  INSTALL_HOMEBRIDGE=true
   whiptail --msgbox "HomeBridge will be installed and set to run automatically at boot. The pin when registering Clock-Pi is the HomeBridge default, 031-45-154" 10 60
 else
-  INSTALL_HOMEKIT=false
+  INSTALL_HOMEBRIDGE=false
   whiptail --msgbox "HomeBridge will not be installed." 10 60
 fi
 
@@ -116,7 +116,7 @@ else
   whiptail --msgbox "Netatalk will not be installed." 10 60
 fi
 
-if (whiptail --title "Confirm" --no-button "Cancel" --yesno "Is this information correct? \n Install Main Script = true \n Install Web Backend = true \n Install Shairport Sync = $INSTALL_SHAIRPORT_SYNC \n Install HomeKit = $INSTALL_HOMEKIT \n Install Netatalk = $INSTALL_NETATALK" 15 65) then
+if (whiptail --title "Confirm" --no-button "Cancel" --yesno "Is this information correct? \n Install Main Script = true \n Install Web Backend = true \n Install Shairport Sync = $INSTALL_SHAIRPORT_SYNC \n Install HomeKit = $INSTALL_HOMEBRIDGE \n Install Netatalk = $INSTALL_NETATALK" 15 65) then
   :
 else
   whiptail --msgbox "Install Canceled." 10 60
@@ -134,24 +134,25 @@ clear
 echo ""
 
 start_spinner "Updating Packages..."
-apt-get update > /dev/null 2>&1
+apt-get update -qq
 stop_spinner $?
 start_spinner "Upgrading Packages..."
-apt-get upgrade -y > /dev/null 2>&1
-apt-get dist-upgrade -y > /dev/null 2>&1
-apt-get autoremove -y > /dev/null 2>&1
-apt-get clean > /dev/null 2>&1
+apt-get upgrade -yqq
+apt-get dist-upgrade -yqq
+apt-get autoremove -yqq
+apt-get clean
 stop_spinner $?
 
 start_spinner "Installing apt-get Packages..."
-apt-get install bc git i2c-tools libavformat-dev libfreetype6-dev libfuse-dev libjpeg-dev libportmidi-dev libsdl-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libsmpeg-dev libswscale-dev python-dev python-imaging python-numpy python-pip python-pygame python-smbus -y > /dev/null 2>&1
+apt-get install bc git i2c-tools libavformat-dev libfreetype6-dev libfuse-dev libjpeg-dev libportmidi-dev libsdl-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libsmpeg-dev libswscale-dev python-dev python-imaging python-numpy python-pip python-pygame python-smbus -yqq
 stop_spinner $?
 start_spinner "Installing python-pip packages..."
-pip install flask psutil pyfirmata requests > /dev/null 2>&1
+pip install flask psutil pyfirmata requests -q
 stop_spinner $?
 
 start_spinner "Installing Main Script and Web Backend..."
-git clone https://github.com/mhar9000/Clock-Pi.git > /dev/null 2>&1
+bash -c '[ -d /home/pi/Clock-Pi/ ] && rm -rf /home/pi/Clock-Pi/'
+git clone https://github.com/mhar9000/Clock-Pi.git -q
 cat > /lib/systemd/system/arduino_shutdown.service <<EOL
 [Unit]
 Description=Arduino Shutdown Button
@@ -192,33 +193,35 @@ WantedBy=multi-user.target
 EOL
 chmod 644 /lib/systemd/system/web.service
 systemctl daemon-reload
-systemctl enable arduino_shutdown.service > /dev/null 2>&1
-systemctl enable clock.service > /dev/null 2>&1
-systemctl enable web.service > /dev/null 2>&1
-rm /home/pi/Clock-Pi/Music/README.md > /dev/null 2>&1
-rm -rf /home/pi/Clock-Pi/.git > /dev/null 2>&1
-chown -R pi:pi /home/pi/Clock-Pi/ > /dev/null 2>&1
+systemctl enable arduino_shutdown.service -q
+systemctl enable clock.service -q
+systemctl enable web.service -q
+rm /home/pi/Clock-Pi/Music/README.md
+rm -rf /home/pi/Clock-Pi/.git
+rm /home/pi/Clock-Pi/install.sh
+chown -R pi:pi /home/pi/Clock-Pi/
 stop_spinner $?
 
 if [ "$INSTALL_SHAIRPORT_SYNC" = true ] ; then
   start_spinner "Installing Shairport-Sync prerequisites..."
-  apt-get install autoconf automake avahi-daemon build-essential libasound2-dev libavahi-client-dev libconfig-dev libdaemon-dev libpopt-dev libssl-dev libtool xmltoman -y > /dev/null 2>&1
+  apt-get install autoconf automake avahi-daemon build-essential libasound2-dev libavahi-client-dev libconfig-dev libdaemon-dev libpopt-dev libssl-dev libtool xmltoman -yqq
   stop_spinner $?
   start_spinner "Downloading Shairport-Sync..."
-  git clone https://github.com/mikebrady/shairport-sync.git > /dev/null 2>&1
-  cd /home/pi/shairport-sync > /dev/null 2>&1
+  bash -c '[ -d /home/pi/shairport-sync/ ] && rm -rf /home/pi/shairport-sync/'
+  git clone https://github.com/mikebrady/shairport-sync.git -q
+  cd /home/pi/shairport-sync/
   stop_spinner $?
   start_spinner "Installing Shairport-Sync..."
   autoreconf -i -f > /dev/null 2>&1
-  ./configure --with-alsa --with-avahi --with-ssl=openssl --with-systemd > /dev/null 2>&1
-  make > /dev/null 2>&1
+  ./configure --with-alsa --with-avahi --with-ssl=openssl --with-systemd > /dev/null
+  make -s > /dev/null
   stop_spinner $?
   start_spinner "Setting Up Shairport-Sync..."
-  getent group shairport-sync &>/dev/null || groupadd -r shairport-sync >/dev/null
-  getent passwd shairport-sync &> /dev/null || useradd -r -M -g shairport-sync -s /usr/bin/nologin -G audio shairport-sync >/dev/null
-  make install > /dev/null 2>&1
-  systemctl enable shairport-sync > /dev/null 2>&1
-  cd /home/pi
+  getent group shairport-sync &> /dev/null || groupadd -r shairport-sync > /dev/null
+  getent passwd shairport-sync &> /dev/null || useradd -r -M -g shairport-sync -s /usr/bin/nologin -G audio shairport-sync > /dev/null
+  make install > /dev/null
+  systemctl enable shairport-sync -q
+  cd /home/pi/
   rm -rf /home/pi/shairport-sync
   cat > /usr/local/etc/shairport-sync.conf <<EOL
 general =
@@ -231,35 +234,36 @@ volume_range_db = 30 ;
 
 sessioncontrol =
 {
-run_this_before_play_begins = "/usr/bin/curl http://localhost/api/on/11/ > /dev/null 2>&1";
-run_this_after_play_ends = "/usr/bin/curl http://localhost/api/off/11/ > /dev/null 2>&1";
+run_this_before_play_begins = "/usr/bin/curl -sSI http://localhost/api/off/11/ > /dev/null";
+run_this_after_play_ends = "/usr/bin/curl -sSI http://localhost/api/off/11/ > /dev/null";
 };
 EOL
   stop_spinner $?
 fi
 
 
-if [ "$INSTALL_HOMEKIT" = true ] ; then
+if [ "$INSTALL_HOMEBRIDGE" = true ] ; then
   start_spinner "Installing HomeBridge prerequisites..."
-  apt-get install libavahi-compat-libdnssd-dev -y > /dev/null 2>&1
+  apt-get install libavahi-compat-libdnssd-dev -yqq
   stop_spinner $?
   start_spinner "Installing NodeJS (For HomeBridge)..."
-  curl -sL https://deb.nodesource.com/setup_7.x | bash -  > /dev/null 2>&1
-  apt-get install -y nodejs > /dev/null 2>&1
+  curl -sSL https://deb.nodesource.com/setup_7.x | bash > /dev/null
+  apt-get install -yqq nodejs
   stop_spinner $?
   start_spinner "Installing HomeBridge..."
   npm install -g --unsafe-perm homebridge > /dev/null 2>&1
   stop_spinner $?
   start_spinner "Installing HomeBridge Plugins..."
-  npm install -g homebridge-better-http-rgb > /dev/null 2>&1
   npm install -g homebridge-http-temperature > /dev/null 2>&1
+  npm install -g homebridge-better-http-rgb > /dev/null 2>&1
   npm install -g homebridge-pi > /dev/null 2>&1
   stop_spinner $?
   start_spinner "Finishing installing HomeBridge..."
-  useradd -M --system homebridge > /dev/null 2>&1
-  mkdir -p /var/lib/homebridge > /dev/null 2>&1
-  chown homebridge: /var/lib/homebridge > /dev/null 2>&1
-  chmod u+w /var/lib/homebridge > /dev/null 2>&1
+  id -u homebridge &> /dev/null || useradd -M --system homebridge
+  bash -c '[ -d /var/lib/homebridge ] && rm -rf /var/lib/homebridge'
+  mkdir /var/lib/homebridge
+  chown homebridge: /var/lib/homebridge
+  chmod u+w /var/lib/homebridge
   cat > /etc/systemd/system/homebridge.service <<'EOL'
 [Unit]
 Description=Node.js HomeKit Server
@@ -356,15 +360,15 @@ EOL
   "platforms": []
 }
 EOL
-  systemctl daemon-reload > /dev/null 2>&1
-  systemctl enable homebridge > /dev/null 2>&1
+  systemctl daemon-reload
+  systemctl enable homebridge -q
   stop_spinner $?
 fi
 
 
 if [ "$INSTALL_NETATALK" = true ] ; then
   start_spinner "Installing Netatalk..."
-  apt-get install netatalk -y > /dev/null 2>&1
+  apt-get install netatalk -yqq
   stop_spinner $?
 fi
 
@@ -374,19 +378,24 @@ raspi-config nonint do_spi 0
 stop_spinner $?
 
 start_spinner "Installing Papirus Driver..."
-git clone https://github.com/PiSupply/PaPiRus.git > /dev/null 2>&1
-cd PaPiRus > /dev/null 2>&1
-python setup.py install > /dev/null 2>&1
+bash -c '[ -d /home/pi/PaPiRus/ ] && rm -rf /home/pi/PaPiRus/'
+git clone https://github.com/PiSupply/PaPiRus.git -q
+cd /home/pi/PaPiRus/
+python setup.py install > /dev/null
+cd /home/pi
 rm -rf /home/pi/PaPiRus/
-rm /home/pi/Clock-Pi/install.sh
-mkdir /tmp/papirus
-cd /tmp/papirus
-git clone https://github.com/repaper/gratis.git > /dev/null 2>&1
-cd /tmp/papirus/gratis
-make rpi EPD_IO=epd_io.h PANEL_VERSION="V231_G2" > /dev/null 2>&1
-make rpi-install EPD_IO=epd_io.h PANEL_VERSION="V231_G2" > /dev/null 2>&1
-systemctl enable epd-fuse.service > /dev/null 2>&1
-papirus-set 2.7 > /dev/null 2>&1
+cd /tmp/
+bash -c '[ -d /tmp/papirus/ ] && rm -rf /tmp/papirus/'
+mkdir /tmp/papirus/
+cd /tmp/papirus/
+git clone https://github.com/repaper/gratis.git -q
+cd /tmp/papirus/gratis/
+make rpi EPD_IO=epd_io.h PANEL_VERSION="V231_G2" > /dev/null
+make rpi-install EPD_IO=epd_io.h PANEL_VERSION="V231_G2" > /dev/null
+systemctl enable epd-fuse.service -q
+papirus-set 2.7 > /dev/null
+cd /home/pi/
+rm -rf /tmp/papirus/
 stop_spinner $?
 
 whiptail --msgbox "Install sucsessful!" 10 60
