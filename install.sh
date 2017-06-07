@@ -134,17 +134,17 @@ clear
 echo ""
 
 start_spinner "Updating Packages..."
-apt-get update -qq
+apt-get update > /dev/null 2>&1
 stop_spinner $?
 start_spinner "Upgrading Packages..."
-apt-get upgrade -y -qq
-apt-get dist-upgrade -y -qq
-apt-get autoremove -y -qq
+apt-get upgrade -y > /dev/null 2>&1
+apt-get dist-upgrade -y > /dev/null 2>&1
+apt-get autoremove -y > /dev/null 2>&1
 apt-get clean
 stop_spinner $?
 
 start_spinner "Installing apt-get Packages..."
-apt-get install bc git i2c-tools libavformat-dev libfreetype6-dev libfuse-dev libjpeg-dev libportmidi-dev libsdl-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libsmpeg-dev libswscale-dev python-dev python-imaging python-numpy python-pip python-pygame python-smbus -y -qq
+apt-get install bc git i2c-tools libavformat-dev libfreetype6-dev libfuse-dev libjpeg-dev libportmidi-dev libsdl-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libsmpeg-dev libswscale-dev python-dev python-imaging python-numpy python-pip python-pygame python-smbus -y > /dev/null 2>&1
 stop_spinner $?
 start_spinner "Installing python-pip packages..."
 pip install flask psutil pyfirmata requests -q
@@ -204,7 +204,7 @@ stop_spinner $?
 
 if [ "$INSTALL_SHAIRPORT_SYNC" = true ] ; then
   start_spinner "Installing Shairport-Sync prerequisites..."
-  apt-get install autoconf automake avahi-daemon build-essential libasound2-dev libavahi-client-dev libconfig-dev libdaemon-dev libpopt-dev libssl-dev libtool xmltoman -y -qq
+  apt-get install autoconf automake avahi-daemon build-essential libasound2-dev libavahi-client-dev libconfig-dev libdaemon-dev libpopt-dev libssl-dev libtool xmltoman -y > /dev/null 2>&1
   stop_spinner $?
   start_spinner "Downloading Shairport-Sync..."
   bash -c '[ -d /home/pi/shairport-sync/ ] && rm -rf /home/pi/shairport-sync/'
@@ -244,11 +244,11 @@ fi
 
 if [ "$INSTALL_HOMEBRIDGE" = true ] ; then
   start_spinner "Installing HomeBridge prerequisites..."
-  apt-get install libavahi-compat-libdnssd-dev -y -qq
+  apt-get install libavahi-compat-libdnssd-dev -y > /dev/null 2>&1
   stop_spinner $?
   start_spinner "Installing NodeJS (For HomeBridge)..."
   curl -sSL https://deb.nodesource.com/setup_7.x | bash > /dev/null 2>&1
-  apt-get install nodejs -y -qq
+  apt-get install nodejs -y > /dev/null 2>&1
   stop_spinner $?
   start_spinner "Installing HomeBridge..."
   npm install -g --unsafe-perm homebridge > /dev/null 2>&1
@@ -368,7 +368,7 @@ fi
 
 if [ "$INSTALL_NETATALK" = true ] ; then
   start_spinner "Installing Netatalk..."
-  apt-get install netatalk -y -qq
+  apt-get install netatalk -y > /dev/null 2>&1
   stop_spinner $?
 fi
 
