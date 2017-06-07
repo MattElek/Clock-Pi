@@ -134,25 +134,25 @@ clear
 echo ""
 
 start_spinner "Updating Packages..."
-apt-get update -qq
+apt-get update -qq > /dev/null 2>&1
 stop_spinner $?
 start_spinner "Upgrading Packages..."
-apt-get upgrade -yqq
-apt-get dist-upgrade -yqq
-apt-get autoremove -yqq
+apt-get upgrade -yqq > /dev/null 2>&1
+apt-get dist-upgrade -yqq > /dev/null 2>&1
+apt-get autoremove -yqq > /dev/null 2>&1
 apt-get clean
 stop_spinner $?
 
 start_spinner "Installing apt-get Packages..."
-apt-get install bc git i2c-tools libavformat-dev libfreetype6-dev libfuse-dev libjpeg-dev libportmidi-dev libsdl-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libsmpeg-dev libswscale-dev python-dev python-imaging python-numpy python-pip python-pygame python-smbus -yqq
+apt-get install bc git i2c-tools libavformat-dev libfreetype6-dev libfuse-dev libjpeg-dev libportmidi-dev libsdl-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libsmpeg-dev libswscale-dev python-dev python-imaging python-numpy python-pip python-pygame python-smbus -yqq > /dev/null 2>&1
 stop_spinner $?
 start_spinner "Installing python-pip packages..."
-pip install flask psutil pyfirmata requests -q
+pip install flask psutil pyfirmata requests -q > /dev/null 2>&1
 stop_spinner $?
 
 start_spinner "Installing Main Script and Web Backend..."
 bash -c '[ -d /home/pi/Clock-Pi/ ] && rm -rf /home/pi/Clock-Pi/'
-git clone https://github.com/mhar9000/Clock-Pi.git -q
+git clone https://github.com/mhar9000/Clock-Pi.git -q > /dev/null 2>&1
 cat > /lib/systemd/system/arduino_shutdown.service <<EOL
 [Unit]
 Description=Arduino Shutdown Button
@@ -204,22 +204,22 @@ stop_spinner $?
 
 if [ "$INSTALL_SHAIRPORT_SYNC" = true ] ; then
   start_spinner "Installing Shairport-Sync prerequisites..."
-  apt-get install autoconf automake avahi-daemon build-essential libasound2-dev libavahi-client-dev libconfig-dev libdaemon-dev libpopt-dev libssl-dev libtool xmltoman -yqq
+  apt-get install autoconf automake avahi-daemon build-essential libasound2-dev libavahi-client-dev libconfig-dev libdaemon-dev libpopt-dev libssl-dev libtool xmltoman -yqq > /dev/null 2>&1
   stop_spinner $?
   start_spinner "Downloading Shairport-Sync..."
   bash -c '[ -d /home/pi/shairport-sync/ ] && rm -rf /home/pi/shairport-sync/'
-  git clone https://github.com/mikebrady/shairport-sync.git -q
+  git clone https://github.com/mikebrady/shairport-sync.git -q > /dev/null 2>&1
   cd /home/pi/shairport-sync/
   stop_spinner $?
   start_spinner "Installing Shairport-Sync..."
   autoreconf -i -f > /dev/null 2>&1
-  ./configure --with-alsa --with-avahi --with-ssl=openssl --with-systemd > /dev/null
-  make -s > /dev/null
+  ./configure --with-alsa --with-avahi --with-ssl=openssl --with-systemd > /dev/null 2>&1
+  make -s > /dev/null 2>&1
   stop_spinner $?
   start_spinner "Setting Up Shairport-Sync..."
-  getent group shairport-sync &> /dev/null || groupadd -r shairport-sync > /dev/null
-  getent passwd shairport-sync &> /dev/null || useradd -r -M -g shairport-sync -s /usr/bin/nologin -G audio shairport-sync > /dev/null
-  make install > /dev/null
+  getent group shairport-sync &> /dev/null 2>&1 || groupadd -r shairport-sync > /dev/null 2>&1
+  getent passwd shairport-sync &> /dev/null 2>&1 || useradd -r -M -g shairport-sync -s /usr/bin/nologin -G audio shairport-sync > /dev/null 2>&1
+  make install > /dev/null 2>&1
   systemctl enable shairport-sync -q
   cd /home/pi/
   rm -rf /home/pi/shairport-sync
@@ -234,8 +234,8 @@ volume_range_db = 30 ;
 
 sessioncontrol =
 {
-run_this_before_play_begins = "/usr/bin/curl -sSI http://localhost/api/off/11/ > /dev/null";
-run_this_after_play_ends = "/usr/bin/curl -sSI http://localhost/api/off/11/ > /dev/null";
+run_this_before_play_begins = "/usr/bin/curl -sSI http://localhost/api/off/11/ > /dev/null 2>&1";
+run_this_after_play_ends = "/usr/bin/curl -sSI http://localhost/api/off/11/ > /dev/null 2>&1";
 };
 EOL
   stop_spinner $?
@@ -247,7 +247,7 @@ if [ "$INSTALL_HOMEBRIDGE" = true ] ; then
   apt-get install libavahi-compat-libdnssd-dev -yqq
   stop_spinner $?
   start_spinner "Installing NodeJS (For HomeBridge)..."
-  curl -sSL https://deb.nodesource.com/setup_7.x | bash > /dev/null
+  curl -sSL https://deb.nodesource.com/setup_7.x | bash > /dev/null 2>&1
   apt-get install -yqq nodejs
   stop_spinner $?
   start_spinner "Installing HomeBridge..."
@@ -381,7 +381,7 @@ start_spinner "Installing Papirus Driver..."
 bash -c '[ -d /home/pi/PaPiRus/ ] && rm -rf /home/pi/PaPiRus/'
 git clone https://github.com/PiSupply/PaPiRus.git -q
 cd /home/pi/PaPiRus/
-python setup.py install > /dev/null
+python setup.py install > /dev/null 2>&1
 cd /home/pi
 rm -rf /home/pi/PaPiRus/
 cd /tmp/
@@ -390,10 +390,10 @@ mkdir /tmp/papirus/
 cd /tmp/papirus/
 git clone https://github.com/repaper/gratis.git -q
 cd /tmp/papirus/gratis/
-make rpi EPD_IO=epd_io.h PANEL_VERSION="V231_G2" > /dev/null
-make rpi-install EPD_IO=epd_io.h PANEL_VERSION="V231_G2" > /dev/null
+make rpi EPD_IO=epd_io.h PANEL_VERSION="V231_G2" > /dev/null 2>&1
+make rpi-install EPD_IO=epd_io.h PANEL_VERSION="V231_G2" > /dev/null 2>&1
 systemctl enable epd-fuse.service -q
-papirus-set 2.7 > /dev/null
+papirus-set 2.7 > /dev/null 2>&1
 cd /home/pi/
 rm -rf /tmp/papirus/
 stop_spinner $?
