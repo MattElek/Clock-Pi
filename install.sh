@@ -134,25 +134,25 @@ clear
 echo ""
 
 start_spinner "Updating Packages..."
-apt-get update -qq > /dev/null 2>&1
+apt-get update -qq
 stop_spinner $?
 start_spinner "Upgrading Packages..."
-apt-get upgrade -yqq > /dev/null 2>&1
-apt-get dist-upgrade -yqq > /dev/null 2>&1
-apt-get autoremove -yqq > /dev/null 2>&1
+apt-get upgrade -y -qq
+apt-get dist-upgrade -y -qq
+apt-get autoremove -y -qq
 apt-get clean
 stop_spinner $?
 
 start_spinner "Installing apt-get Packages..."
-apt-get install bc git i2c-tools libavformat-dev libfreetype6-dev libfuse-dev libjpeg-dev libportmidi-dev libsdl-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libsmpeg-dev libswscale-dev python-dev python-imaging python-numpy python-pip python-pygame python-smbus -yqq > /dev/null 2>&1
+apt-get install bc git i2c-tools libavformat-dev libfreetype6-dev libfuse-dev libjpeg-dev libportmidi-dev libsdl-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libsmpeg-dev libswscale-dev python-dev python-imaging python-numpy python-pip python-pygame python-smbus -y -qq
 stop_spinner $?
 start_spinner "Installing python-pip packages..."
-pip install flask psutil pyfirmata requests -q > /dev/null 2>&1
+pip install flask psutil pyfirmata requests -q
 stop_spinner $?
 
 start_spinner "Installing Main Script and Web Backend..."
-bash -c '[ -d /home/pi/Clock-Pi/ ] && rm -rf /home/pi/Clock-Pi/' > /dev/null 2>&1
-git clone https://github.com/mhar9000/Clock-Pi.git -q > /dev/null 2>&1
+bash -c '[ -d /home/pi/Clock-Pi/ ] && rm -rf /home/pi/Clock-Pi/'
+git clone https://github.com/mhar9000/Clock-Pi.git -q
 cat > /lib/systemd/system/arduino_shutdown.service <<EOL
 [Unit]
 Description=Arduino Shutdown Button
@@ -193,9 +193,9 @@ WantedBy=multi-user.target
 EOL
 chmod 644 /lib/systemd/system/web.service
 systemctl daemon-reload
-systemctl enable arduino_shutdown.service -q > /dev/null 2>&1
-systemctl enable clock.service -q > /dev/null 2>&1
-systemctl enable web.service -q > /dev/null 2>&1
+systemctl enable arduino_shutdown.service -q
+systemctl enable clock.service -q
+systemctl enable web.service -q
 rm /home/pi/Clock-Pi/Music/README.md
 rm -rf /home/pi/Clock-Pi/.git
 rm /home/pi/Clock-Pi/install.sh
@@ -204,11 +204,11 @@ stop_spinner $?
 
 if [ "$INSTALL_SHAIRPORT_SYNC" = true ] ; then
   start_spinner "Installing Shairport-Sync prerequisites..."
-  apt-get install autoconf automake avahi-daemon build-essential libasound2-dev libavahi-client-dev libconfig-dev libdaemon-dev libpopt-dev libssl-dev libtool xmltoman -yqq > /dev/null 2>&1
+  apt-get install autoconf automake avahi-daemon build-essential libasound2-dev libavahi-client-dev libconfig-dev libdaemon-dev libpopt-dev libssl-dev libtool xmltoman -y -qq
   stop_spinner $?
   start_spinner "Downloading Shairport-Sync..."
-  bash -c '[ -d /home/pi/shairport-sync/ ] && rm -rf /home/pi/shairport-sync/' > /dev/null 2>&1
-  git clone https://github.com/mikebrady/shairport-sync.git -q > /dev/null 2>&1
+  bash -c '[ -d /home/pi/shairport-sync/ ] && rm -rf /home/pi/shairport-sync/'
+  git clone https://github.com/mikebrady/shairport-sync.git -q
   cd /home/pi/shairport-sync/
   stop_spinner $?
   start_spinner "Installing Shairport-Sync..."
@@ -234,7 +234,7 @@ volume_range_db = 30 ;
 
 sessioncontrol =
 {
-run_this_before_play_begins = "/usr/bin/curl -sSI http://localhost/api/off/11/ > /dev/null 2>&1";
+run_this_before_play_begins = "/usr/bin/curl -sSI http://localhost/api/on/11/ > /dev/null 2>&1";
 run_this_after_play_ends = "/usr/bin/curl -sSI http://localhost/api/off/11/ > /dev/null 2>&1";
 };
 EOL
@@ -244,11 +244,11 @@ fi
 
 if [ "$INSTALL_HOMEBRIDGE" = true ] ; then
   start_spinner "Installing HomeBridge prerequisites..."
-  apt-get install libavahi-compat-libdnssd-dev -yqq > /dev/null 2>&1
+  apt-get install libavahi-compat-libdnssd-dev -y -qq
   stop_spinner $?
   start_spinner "Installing NodeJS (For HomeBridge)..."
   curl -sSL https://deb.nodesource.com/setup_7.x | bash > /dev/null 2>&1
-  apt-get install -yqq nodejs > /dev/null 2>&1
+  apt-get install nodejs -y -qq
   stop_spinner $?
   start_spinner "Installing HomeBridge..."
   npm install -g --unsafe-perm homebridge > /dev/null 2>&1
@@ -260,7 +260,7 @@ if [ "$INSTALL_HOMEBRIDGE" = true ] ; then
   stop_spinner $?
   start_spinner "Finishing installing HomeBridge..."
   id -u homebridge &> /dev/null || useradd -M --system homebridge > /dev/null 2>&1
-  bash -c '[ -d /var/lib/homebridge ] && rm -rf /var/lib/homebridge' > /dev/null 2>&1
+  bash -c '[ -d /var/lib/homebridge ] && rm -rf /var/lib/homebridge'
   mkdir /var/lib/homebridge
   chown homebridge: /var/lib/homebridge
   chmod u+w /var/lib/homebridge
@@ -368,7 +368,7 @@ fi
 
 if [ "$INSTALL_NETATALK" = true ] ; then
   start_spinner "Installing Netatalk..."
-  apt-get install netatalk -yqq > /dev/null 2>&1
+  apt-get install netatalk -y -qq
   stop_spinner $?
 fi
 
@@ -379,16 +379,16 @@ stop_spinner $?
 
 start_spinner "Installing Papirus Driver..."
 bash -c '[ -d /home/pi/PaPiRus/ ] && rm -rf /home/pi/PaPiRus/'
-git clone https://github.com/PiSupply/PaPiRus.git -q > /dev/null 2>&1
+git clone https://github.com/PiSupply/PaPiRus.git -q
 cd /home/pi/PaPiRus/
 python setup.py install > /dev/null 2>&1
 cd /home/pi
 rm -rf /home/pi/PaPiRus/
 cd /tmp/
-bash -c '[ -d /tmp/papirus/ ] && rm -rf /tmp/papirus/' > /dev/null 2>&1
+bash -c '[ -d /tmp/papirus/ ] && rm -rf /tmp/papirus/'
 mkdir /tmp/papirus/
 cd /tmp/papirus/
-git clone https://github.com/repaper/gratis.git -q > /dev/null 2>&1
+git clone https://github.com/repaper/gratis.git -q
 cd /tmp/papirus/gratis/
 make rpi EPD_IO=epd_io.h PANEL_VERSION="V231_G2" > /dev/null 2>&1
 make rpi-install EPD_IO=epd_io.h PANEL_VERSION="V231_G2" > /dev/null 2>&1
