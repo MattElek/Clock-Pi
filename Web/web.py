@@ -135,7 +135,7 @@ app = Flask(__name__) # Create flask object
 #################################
 ##### Create and read files #####
 #################################
-with open("/home/pi/Clock-Pi/Clock/config.csv", "r") as f: # Read alarm file
+with open("/home/pi/Clock-Pi/alarm_data.csv", "r") as f: # Read alarm file
     text = f.read()
     words = text.split(",")
     alarm_hour = int(words[0])
@@ -224,7 +224,7 @@ def alarm_control():
             alarm_min = request.form["minute"]
 
         # Write alarm data to file
-        with open("/home/pi/Clock-Pi/Clock/config.csv", "w") as f:
+        with open("/home/pi/Clock-Pi/alarm_data.csv", "w") as f:
             f.seek(0)
             if alarm_set == True:
                 new_text = str(alarm_hour) + "," + str(alarm_min) + "," + "1"
@@ -238,7 +238,7 @@ def alarm_control():
         now = datetime.now()
         timeString = now.strftime("%m/%d/%Y, %I:%M:%S %p") # Get the current time
 
-        with open("/home/pi/Clock-Pi/Clock/config.csv", "r") as f: # Read alarm file
+        with open("/home/pi/Clock-Pi/alarm_data.csv", "r") as f: # Read alarm file
             text = f.read()
             words = text.split(",")
             alarm_hour = int(words[0])

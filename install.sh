@@ -151,7 +151,7 @@ pip install flask psutil pyfirmata requests -q > /dev/null 2>&1
 stop_spinner $?
 
 start_spinner "Installing Main Script and Web Backend..."
-bash -c '[ -d /home/pi/Clock-Pi/ ] && rm -rf /home/pi/Clock-Pi/'
+bash -c '[ -d /home/pi/Clock-Pi/ ] && rm -rf /home/pi/Clock-Pi/' > /dev/null 2>&1
 git clone https://github.com/mhar9000/Clock-Pi.git -q > /dev/null 2>&1
 cat > /lib/systemd/system/arduino_shutdown.service <<EOL
 [Unit]
@@ -193,9 +193,9 @@ WantedBy=multi-user.target
 EOL
 chmod 644 /lib/systemd/system/web.service
 systemctl daemon-reload
-systemctl enable arduino_shutdown.service -q
-systemctl enable clock.service -q
-systemctl enable web.service -q
+systemctl enable arduino_shutdown.service -q > /dev/null 2>&1
+systemctl enable clock.service -q > /dev/null 2>&1
+systemctl enable web.service -q > /dev/null 2>&1
 rm /home/pi/Clock-Pi/Music/README.md
 rm -rf /home/pi/Clock-Pi/.git
 rm /home/pi/Clock-Pi/install.sh
@@ -207,7 +207,7 @@ if [ "$INSTALL_SHAIRPORT_SYNC" = true ] ; then
   apt-get install autoconf automake avahi-daemon build-essential libasound2-dev libavahi-client-dev libconfig-dev libdaemon-dev libpopt-dev libssl-dev libtool xmltoman -yqq > /dev/null 2>&1
   stop_spinner $?
   start_spinner "Downloading Shairport-Sync..."
-  bash -c '[ -d /home/pi/shairport-sync/ ] && rm -rf /home/pi/shairport-sync/'
+  bash -c '[ -d /home/pi/shairport-sync/ ] && rm -rf /home/pi/shairport-sync/' > /dev/null 2>&1
   git clone https://github.com/mikebrady/shairport-sync.git -q > /dev/null 2>&1
   cd /home/pi/shairport-sync/
   stop_spinner $?
@@ -220,7 +220,7 @@ if [ "$INSTALL_SHAIRPORT_SYNC" = true ] ; then
   getent group shairport-sync &> /dev/null 2>&1 || groupadd -r shairport-sync > /dev/null 2>&1
   getent passwd shairport-sync &> /dev/null 2>&1 || useradd -r -M -g shairport-sync -s /usr/bin/nologin -G audio shairport-sync > /dev/null 2>&1
   make install > /dev/null 2>&1
-  systemctl enable shairport-sync -q
+  systemctl enable shairport-sync -q > /dev/null 2>&1
   cd /home/pi/
   rm -rf /home/pi/shairport-sync
   cat > /usr/local/etc/shairport-sync.conf <<EOL
@@ -244,11 +244,11 @@ fi
 
 if [ "$INSTALL_HOMEBRIDGE" = true ] ; then
   start_spinner "Installing HomeBridge prerequisites..."
-  apt-get install libavahi-compat-libdnssd-dev -yqq
+  apt-get install libavahi-compat-libdnssd-dev -yqq > /dev/null 2>&1
   stop_spinner $?
   start_spinner "Installing NodeJS (For HomeBridge)..."
   curl -sSL https://deb.nodesource.com/setup_7.x | bash > /dev/null 2>&1
-  apt-get install -yqq nodejs
+  apt-get install -yqq nodejs > /dev/null 2>&1
   stop_spinner $?
   start_spinner "Installing HomeBridge..."
   npm install -g --unsafe-perm homebridge > /dev/null 2>&1
@@ -259,8 +259,8 @@ if [ "$INSTALL_HOMEBRIDGE" = true ] ; then
   npm install -g homebridge-pi > /dev/null 2>&1
   stop_spinner $?
   start_spinner "Finishing installing HomeBridge..."
-  id -u homebridge &> /dev/null || useradd -M --system homebridge
-  bash -c '[ -d /var/lib/homebridge ] && rm -rf /var/lib/homebridge'
+  id -u homebridge &> /dev/null || useradd -M --system homebridge > /dev/null 2>&1
+  bash -c '[ -d /var/lib/homebridge ] && rm -rf /var/lib/homebridge' > /dev/null 2>&1
   mkdir /var/lib/homebridge
   chown homebridge: /var/lib/homebridge
   chmod u+w /var/lib/homebridge
@@ -361,38 +361,38 @@ EOL
 }
 EOL
   systemctl daemon-reload
-  systemctl enable homebridge -q
+  systemctl enable homebridge -q > /dev/null 2>&1
   stop_spinner $?
 fi
 
 
 if [ "$INSTALL_NETATALK" = true ] ; then
   start_spinner "Installing Netatalk..."
-  apt-get install netatalk -yqq
+  apt-get install netatalk -yqq > /dev/null 2>&1
   stop_spinner $?
 fi
 
 start_spinner "Enabling I2C and SPI"
-raspi-config nonint do_i2c 0
-raspi-config nonint do_spi 0
+raspi-config nonint do_i2c 0 > /dev/null 2>&1
+raspi-config nonint do_spi 0 > /dev/null 2>&1
 stop_spinner $?
 
 start_spinner "Installing Papirus Driver..."
 bash -c '[ -d /home/pi/PaPiRus/ ] && rm -rf /home/pi/PaPiRus/'
-git clone https://github.com/PiSupply/PaPiRus.git -q
+git clone https://github.com/PiSupply/PaPiRus.git -q > /dev/null 2>&1
 cd /home/pi/PaPiRus/
 python setup.py install > /dev/null 2>&1
 cd /home/pi
 rm -rf /home/pi/PaPiRus/
 cd /tmp/
-bash -c '[ -d /tmp/papirus/ ] && rm -rf /tmp/papirus/'
+bash -c '[ -d /tmp/papirus/ ] && rm -rf /tmp/papirus/' > /dev/null 2>&1
 mkdir /tmp/papirus/
 cd /tmp/papirus/
-git clone https://github.com/repaper/gratis.git -q
+git clone https://github.com/repaper/gratis.git -q > /dev/null 2>&1
 cd /tmp/papirus/gratis/
 make rpi EPD_IO=epd_io.h PANEL_VERSION="V231_G2" > /dev/null 2>&1
 make rpi-install EPD_IO=epd_io.h PANEL_VERSION="V231_G2" > /dev/null 2>&1
-systemctl enable epd-fuse.service -q
+systemctl enable epd-fuse.service -q > /dev/null 2>&1
 papirus-set 2.7 > /dev/null 2>&1
 cd /home/pi/
 rm -rf /tmp/papirus/
