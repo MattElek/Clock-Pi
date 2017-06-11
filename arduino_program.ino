@@ -119,7 +119,7 @@ void loop() {
         if (pin_eleven_state == true) { // If pin eleven is on:
           digitalWrite(pin_eleven, LOW); // Turn off pin eleven.
           pin_eleven_state = false;
-        } else if (pin_twelve_state == false) { // If pin eleven is off:
+        } else if (pin_eleven_state == false) { // If pin eleven is off:
           digitalWrite(pin_eleven, HIGH); // Turn on pin eleven.
           pin_eleven_state = true;
         }

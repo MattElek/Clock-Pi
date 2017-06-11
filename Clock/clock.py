@@ -907,7 +907,7 @@ def main():
         ##################
         if GPIO.input(SW1) == False:
             display_time()
-            draw.text((2, 10), " Back  More  " + pin_twelve_name + "   " +  pin_ten_name, fill=BLACK, font=menu_font)
+            draw.text((2, 10), " Back  More  " + pin_ten_name + "   " +  pin_nine_name, fill=BLACK, font=menu_font)
             papirus.display(image)
             papirus.update()
             count = 0
@@ -928,7 +928,7 @@ def main():
                 ################
                 if GPIO.input(SW3) == False:
                     display_time()
-                    draw.text((2, 10), " Back  " + pin_nine_name + "  " + pin_eleven_name+ "   Off", fill=BLACK, font=menu_font)
+                    draw.text((2, 10), " Back  " + pin_eleven_name + "  " + pin_twelve_name + "   Off", fill=BLACK, font=menu_font)
                     papirus.display(image)
                     papirus.update()
                     count = 0
@@ -939,17 +939,17 @@ def main():
                         ################
                         if GPIO.input(SW4) == False:
                             display_time()
-                            draw.text((2, 10), " Back  More  " + pin_twelve_name + "   " +  pin_ten_name, fill=BLACK, font=menu_font)
+                            draw.text((2, 10), " Back  More  " + pin_ten_name + "   " +  pin_nine_name, fill=BLACK, font=menu_font)
                             papirus.display(image)
                             papirus.update()
                             break
 
-                        ####################
-                        ##### Pin Nine #####
-                        ####################
+                        ######################
+                        ##### Pin Eleven #####
+                        ######################
                         if GPIO.input(SW3) == False:
                             display_time()
-                            draw.text((2, 10), " Back " + pin_nine_name + " 1-Hour 2-Hours", fill=BLACK, font=menu_font)
+                            draw.text((2, 10), " Back " + pin_eleven_name + " 1-Hour 2-Hours", fill=BLACK, font=menu_font)
                             papirus.display(image)
                             papirus.update()
                             count = 0
@@ -960,37 +960,37 @@ def main():
                                 ################
                                 if GPIO.input(SW4) == False:
                                     display_time()
-                                    draw.text((2, 10), " Back  " + pin_nine_name + "  " + pin_eleven_name+ "   Off", fill=BLACK, font=menu_font)
+                                    draw.text((2, 10), " Back  " + pin_eleven_name + "  " + pin_twelve_name + "   Off", fill=BLACK, font=menu_font)
                                     papirus.display(image)
                                     papirus.update()
                                     break
 
-                                ###########################
-                                ##### Pin nine toggle #####
-                                ###########################
+                                #############################
+                                ##### Pin eleven toggle #####
+                                #############################
                                 if GPIO.input(SW3) == False:
                                     display_time()
-                                    draw.text((2, 10), " Back  " + pin_nine_name + "  " + pin_eleven_name+ "   Off", fill=BLACK, font=menu_font)
-                                    draw.text((4, 40), pin_nine_name + " toggled", fill=BLACK, font=menu_font)
+                                    draw.text((2, 10), " Back  " + pin_eleven_name + "  " + pin_twelve_name + "   Off", fill=BLACK, font=menu_font)
+                                    draw.text((4, 40), pin_eleven_name + " toggled", fill=BLACK, font=menu_font)
                                     papirus.display(image)
                                     papirus.update()
                                     timer = False
-                                    pin_change(9, "toggle")
+                                    pin_change(11, "toggle")
                                     break
 
-                                ###########################
+                                ##########################
                                 ##### One-hour timer #####
-                                ###########################
+                                ##########################
                                 if GPIO.input(SW2) == False:
                                     timer = True
                                     one_hour_from_now = datetime.now() + timedelta(hours=1)
                                     turn_off_led = one_hour_from_now.strftime("%-H%-M")
                                     display_time()
-                                    draw.text((2, 10), " Back  " + pin_nine_name + "  " + pin_eleven_name+ "   Off", fill=BLACK, font=menu_font)
-                                    draw.text((4, 40), pin_nine_name + " off at: " + one_hour_from_now.strftime("%-I:%M %p"), fill=BLACK, font=menu_font)
+                                    draw.text((2, 10), " Back  " + pin_eleven_name + "  " + pin_twelve_name + "   Off", fill=BLACK, font=menu_font)
+                                    draw.text((4, 40), pin_eleven_name + " off at: " + one_hour_from_now.strftime("%-I:%M %p"), fill=BLACK, font=menu_font)
                                     papirus.display(image)
                                     papirus.update()
-                                    pin_change(9, "on")
+                                    pin_change(11, "on")
                                     break
 
                                 ##########################
@@ -1001,89 +1001,35 @@ def main():
                                     two_hours_from_now = datetime.now() + timedelta(hours=2)
                                     turn_off_led = two_hours_from_now.strftime("%-H%-M")
                                     display_time()
-                                    draw.text((2, 10), " Back  " + pin_nine_name + "  " + pin_eleven_name+ "   Off", fill=BLACK, font=menu_font)
-                                    draw.text((4, 40), pin_nine_name + " off at: " + two_hours_from_now.strftime("%-I:%M %p"), fill=BLACK, font=menu_font)
+                                    draw.text((2, 10), " Back  " + pin_eleven_name + "  " + pin_twelve_name + "   Off", fill=BLACK, font=menu_font)
+                                    draw.text((4, 40), pin_eleven_name + " off at: " + two_hours_from_now.strftime("%-I:%M %p"), fill=BLACK, font=menu_font)
                                     papirus.display(image)
                                     papirus.update()
-                                    pin_change(9, "on")
+                                    pin_change(11, "on")
                                     break
 
                                 sleep(1)
                                 count = count + 1
 
                         ######################
-                        ##### Pin Eleven #####
+                        ##### Pin Twelve #####
                         ######################
                         if GPIO.input(SW2) == False:
                             display_time()
-                            draw.text((2, 10), " Back " + pin_eleven_name + " 40-min 1-Hour", fill=BLACK, font=menu_font)
+                            draw.text((2, 10), " Back  More  " + pin_ten_name + "   " +  pin_nine_name, fill=BLACK, font=menu_font)
+                            draw.text((4, 40), pin_twelve_name + " toggled", fill=BLACK, font=menu_font)
                             papirus.display(image)
                             papirus.update()
-                            count = 0
-                            while (count < 30):
-
-                                ################
-                                ##### Back #####
-                                ################
-                                if GPIO.input(SW4) == False:
-                                    display_time()
-                                    draw.text((2, 10), " Back  " + pin_nine_name + "  " + pin_eleven_name+ "   Off", fill=BLACK, font=menu_font)
-                                    papirus.display(image)
-                                    papirus.update()
-                                    break
-
-                                #############################
-                                ##### Pin eleven toggle #####
-                                #############################
-                                if GPIO.input(SW3) == False:
-                                    display_time()
-                                    draw.text((2, 10), " Back  " + pin_nine_name + "  " + pin_eleven_name+ "   Off", fill=BLACK, font=menu_font)
-                                    draw.text((4, 40), pin_eleven_name + " toggled", fill=BLACK, font=menu_font)
-                                    papirus.display(image)
-                                    papirus.update()
-                                    speakers_timer = False
-                                    pin_change(11, "toggle")
-                                    break
-
-                                ############################
-                                ##### Fourty-min timer #####
-                                ############################
-                                if GPIO.input(SW2) == False:
-                                    speakers_timer = True
-                                    forty_mins_from_now = datetime.now() + timedelta(minutes=40)
-                                    turn_off_speakers = forty_mins_from_now.strftime("%-H%-M")
-                                    display_time()
-                                    draw.text((2, 10), " Back  " + pin_nine_name + "  " + pin_eleven_name+ "   Off", fill=BLACK, font=menu_font)
-                                    draw.text((4, 40), pin_eleven_name + " off at: " + forty_mins_from_now.strftime("%-I:%M %p"), fill=BLACK, font=menu_font)
-                                    papirus.display(image)
-                                    papirus.update()
-                                    pin_change(11, "on")
-                                    break
-
-                                ##########################
-                                ##### One-hour timer #####
-                                ##########################
-                                if GPIO.input(SW1) == False:
-                                    speakers_timer = True
-                                    one_hour_from_now = datetime.now() + timedelta(hours=1)
-                                    turn_off_speakers = one_hour_from_now.strftime("%-H%-M")
-                                    display_time()
-                                    draw.text((2, 10), " Back  " + pin_nine_name + "  " + pin_eleven_name+ "   Off", fill=BLACK, font=menu_font)
-                                    draw.text((4, 40), pin_eleven_name + " off at: " + one_hour_from_now.strftime("%-I:%M %p"), fill=BLACK, font=menu_font)
-                                    papirus.display(image)
-                                    papirus.update()
-                                    pin_change(11, "on")
-                                    break
-
-                                sleep(1)
-                                count = count + 1
+                            speakers_timer = False
+                            pin_change(12, "toggle")
+                            break
 
                         ###################
                         ##### All off #####
                         ###################
                         if GPIO.input(SW1) == False:
                             display_time()
-                            draw.text((2, 10), " Back  More  " + pin_twelve_name + "   " +  pin_ten_name, fill=BLACK, font=menu_font)
+                            draw.text((2, 10), " Back  More  " + pin_ten_name + "   " +  pin_nine_name, fill=BLACK, font=menu_font)
                             draw.text((4, 40), "All off", fill=BLACK, font=menu_font)
                             papirus.display(image)
                             papirus.update()
@@ -1098,28 +1044,28 @@ def main():
                         sleep(1)
                         count = count + 1
 
-                #############################
-                ##### Pin twelve toggle #####
-                #############################
-                if GPIO.input(SW2) == False:
-                    display_time()
-                    draw.text((2, 10), " Menu   Info   Stuff   Lights", fill=BLACK, font=menu_font)
-                    draw.text((4, 40), pin_twelve_name + " toggled", fill=BLACK, font=menu_font)
-                    papirus.display(image)
-                    papirus.update()
-                    pin_change(12, "toggle")
-                    break
-
                 ##########################
                 ##### Pin ten toggle #####
                 ##########################
-                if GPIO.input(SW1) == False:
+                if GPIO.input(SW2) == False:
                     display_time()
                     draw.text((2, 10), " Menu   Info   Stuff   Lights", fill=BLACK, font=menu_font)
                     draw.text((4, 40), pin_ten_name + " toggled", fill=BLACK, font=menu_font)
                     papirus.display(image)
                     papirus.update()
                     pin_change(10, "toggle")
+                    break
+
+                ##########################
+                ##### Pin nine toggle ####
+                ##########################
+                if GPIO.input(SW1) == False:
+                    display_time()
+                    draw.text((2, 10), " Menu   Info   Stuff   Lights", fill=BLACK, font=menu_font)
+                    draw.text((4, 40), pin_nine_name + " toggled", fill=BLACK, font=menu_font)
+                    papirus.display(image)
+                    papirus.update()
+                    pin_change(9, "toggle")
                     break
 
                 sleep(1)

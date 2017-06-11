@@ -14,7 +14,7 @@
 	{% if text %}
 	<h1>{{ text }}</h1>
 	{% endif %}
-
+	
 	{% if shutdownask %}
 	<h1>Shutdown?</h1>
 	<h3><a href="{{ url_for('control') }}">No</a> &nbsp &nbsp <a href="{{ url_for('shutdown') }}">Yes</a></h3>

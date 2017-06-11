@@ -425,41 +425,14 @@ def page_not_found(error):
     return render_template("error.html", **templateData), 404
 
 ####################
-##### 403 Page #####
-####################
-@app.errorhandler(403)
-def forbidden(error):
-    error1, error2 = str(error).split(":")
-    templateData = {
-       "title" : error1,
-       "error" : error2,
-       "path" : request.path + " forbidden"
-    }
-    return render_template("error.html", **templateData), 403
-
-####################
-##### 410 Page #####
-####################
-@app.errorhandler(410)
-def page_gone(error):
-    error1, error2 = str(error).split(":")
-    templateData = {
-       "title" : error1,
-       "error" : error2,
-       "path" : request.path + " page gone"
-    }
-    return render_template("error.html", **templateData), 410
-
-####################
 ##### 500 Page #####
 ####################
 @app.errorhandler(500)
 def internal_server_error(error):
-    error1, error2 = str(error).split(":")
     templateData = {
-       "title" : error1,
-       "error" : error2,
-       "path" : request.path + " page gone"
+       "title" : "500 Internal Server Error",
+       "error" : error,
+       "path" : ""
     }
     return render_template("error.html", **templateData), 500
 

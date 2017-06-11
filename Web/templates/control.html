@@ -12,46 +12,46 @@
   <meta name="theme-color" content="#ffffff">
 </head>
 <body style="background-color:#181818;color:white;" link="blue" vlink="blue" alink="red">
-   <h1>Control Panel</h1>
-   <h2>Page last reloaded at: {{ time }} &nbsp <a href="{{ url_for('control') }}">Reload</a></h2>
-   <h2>Uptime: {{ uptime }} </h2>
-   <h2>The temperature from the LM75 temperature sensor is: {{ sensor_temp }}°F</h2>
-   <h2>The estimated room temperature is: {{ est_temp }}°F</h2>
-   <h2>The CPU temperature is: {{ cpu_temp }}°F</h2>
-   <h2>The CPU percent is: {{ cpu_percent }}</h2>
-   <h2>The RAM/Memory usage is : {{ virtual_memory }}</h2>
-   <br>
-   <h3>Pin Twelve is
-      {% if pin_twelve %}
-      currently on &nbsp <a href="/api/off/12/">turn off</a>
-      {% else %}
-      currently off &nbsp <a href="/api/on/12/">turn on</a>
-      {% endif %}
-   </h3>
-   <h3>Pin Eleven is
-      {% if pin_eleven %}
-      currently on &nbsp <a href="/api/off/11/">turn off</a>
-      {% else %}
-      currently off &nbsp <a href="/api/on/11/">turn on</a>
-      {% endif %}
-   </h3>
-   <h3>Pin Ten is
-      {% if pin_ten %}
-      currently on &nbsp <a href="/api/off/10/">turn off</a>
-      {% else %}
-      currently off &nbsp <a href="/api/on/10/">turn on</a>
-      {% endif %}
-   </h3>
-   <h3>Pin Nine is
-      {% if pin_nine %}
-      currently on &nbsp <a href="/api/off/9/">turn off</a>
-      {% else %}
-      currently off &nbsp <a href="/api/on/9/">turn on</a>
-      {% endif %}
-   </h3>
-   <br>
-   <h3><a href="{{ url_for('alarm_control') }}">Alarm Control</a></h3>
-   <br>
-   <h3><a href="{{ url_for('rebootask') }}">Reboot</a> &nbsp &nbsp <a href="{{ url_for('shutdownask') }}">Shutdown</a></h3>
+  <h1>Control Panel</h1>
+  <h2>Page last reloaded at: {{ time }} &nbsp <a href="{{ url_for('control') }}">Reload</a></h2>
+  <h2>Uptime: {{ uptime }} </h2>
+  <h2>The temperature from the LM75 temperature sensor is: {{ sensor_temp }}°F</h2>
+  <h2>The estimated room temperature is: {{ est_temp }}°F</h2>
+  <h2>The CPU temperature is: {{ cpu_temp }}°F</h2>
+  <h2>The CPU percent is: {{ cpu_percent }}</h2>
+  <h2>The RAM/Memory usage is : {{ virtual_memory }}</h2>
+  <br>
+  <h3>Pin Twelve is
+    {% if pin_twelve %}
+    currently on &nbsp <a href="/api/off/12/">turn off</a>
+    {% else %}
+    currently off &nbsp <a href="/api/on/12/">turn on</a>
+    {% endif %}
+  </h3>
+  <h3>Pin Eleven is
+    {% if pin_eleven %}
+    currently on &nbsp <a href="/api/off/11/">turn off</a>
+    {% else %}
+    currently off &nbsp <a href="/api/on/11/">turn on</a>
+    {% endif %}
+  </h3>
+  <h3>Pin Ten is
+    {% if pin_ten %}
+    currently on &nbsp <a href="/api/off/10/">turn off</a>
+    {% else %}
+    currently off &nbsp <a href="/api/on/10/">turn on</a>
+    {% endif %}
+  </h3>
+  <h3>Pin Nine is
+    {% if pin_nine %}
+    currently on &nbsp <a href="/api/off/9/">turn off</a>
+    {% else %}
+    currently off &nbsp <a href="/api/on/9/">turn on</a>
+    {% endif %}
+  </h3>
+  <br>
+  <h3><a href="{{ url_for('alarm_control') }}">Alarm Control</a></h3>
+  <br>
+  <h3><a href="{{ url_for('rebootask') }}">Reboot</a> &nbsp &nbsp <a href="{{ url_for('shutdownask') }}">Shutdown</a></h3>
 </body>
 </html>

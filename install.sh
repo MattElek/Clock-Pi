@@ -235,8 +235,8 @@ volume_range_db = 30 ;
 
 sessioncontrol =
 {
-run_this_before_play_begins = "/usr/bin/curl -sSI http://localhost/api/on/11/ > /dev/null 2>&1";
-run_this_after_play_ends = "/usr/bin/curl -sSI http://localhost/api/off/11/ > /dev/null 2>&1";
+run_this_before_play_begins = "/usr/bin/curl -sSI http://localhost/api/on/12/ > /dev/null 2>&1";
+run_this_after_play_ends = "/usr/bin/curl -sSI http://localhost/api/off/12/ > /dev/null 2>&1";
 };
 EOL
   stop_spinner $?
