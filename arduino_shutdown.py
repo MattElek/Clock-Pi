@@ -7,9 +7,9 @@
 ############################
 ##### Import Libraries #####
 ############################
-from pyfirmata import Arduino, util
 from signal import signal, SIGTERM
 from os import getuid, system
+from serial import Serial
 from time import sleep
 
 ###############################################
@@ -32,31 +32,29 @@ def main():
     ##############################
     ##### Connect to Arduino #####
     ##############################
-    global board
-    board = Arduino("/dev/ttyACM0")
-    it = util.Iterator(board)
-    it.start()
-    pin_four = board.get_pin("d:4:i")
-    pin_four.enable_reporting()
-    board.digital[13].write(1)
+    board = Serial("/dev/ttyACM0") # Connect to Arduino
+    board.timeout = 2
+    board.write("Q")
 
     while True:
         sleep(10) # Sleep for ten seconds
-        button = pin_four.read() # Read button on pin four
+        board.write("h")
         sleep(1)  # Wait a second
-        if button == True: # If the button is pressed
+        rx_bytes = board.readline()
+        if "True" in rx_bytes:
+            board.write("h")
             sleep(1) # Wait a second
-            button = pin_four.read() # Check button on pin four again to be sure
-            if button == True: # If the button is pressed
-                board.digital[13].write(0) # Flash Leds
+            rx_bytes = board.readline()
+            if "True" in rx_bytes:
+                board.write("q") # Flash Leds
                 sleep(1)
-                board.digital[13].write(1)
+                board.write("Q")
                 sleep(1)
-                board.digital[13].write(0)
+                board.write("q")
                 sleep(1)
-                board.digital[13].write(1)
+                board.write("Q")
                 sleep(1)
-                board.digital[13].write(0)
+                board.write("q")
                 system("shutdown -r 1")
             	raise SystemExit
 

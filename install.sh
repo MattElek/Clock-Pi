@@ -147,7 +147,7 @@ start_spinner "Installing apt-get Packages..."
 apt-get install bc git i2c-tools libavformat-dev libfreetype6-dev libfuse-dev libjpeg-dev libportmidi-dev libsdl-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libsmpeg-dev libswscale-dev python-dev python-imaging python-numpy python-pip python-pygame python-smbus -y > /dev/null 2>&1
 stop_spinner $?
 start_spinner "Installing python-pip packages..."
-pip install flask psutil pyfirmata requests -q
+pip install flask psutil pyserial requests > /dev/null 2>&1
 stop_spinner $?
 
 start_spinner "Installing Main Script and Web Backend..."
@@ -160,7 +160,7 @@ After=multi-user.target
 
 [Service]
 Type=idle
-ExecStart=/usr/bin/python /home/pi/Clock-Pi/arduino_shutdown.py
+ExecStart=/usr/bin/env python /home/pi/Clock-Pi/arduino_shutdown.py
 
 [Install]
 WantedBy=multi-user.target
@@ -173,7 +173,7 @@ After=multi-user.target
 
 [Service]
 Type=idle
-ExecStart=/usr/bin/python /home/pi/Clock-Pi/Clock/clock.py
+ExecStart=/usr/bin/env python /home/pi/Clock-Pi/Clock/clock.py
 
 [Install]
 WantedBy=multi-user.target
@@ -186,7 +186,7 @@ After=multi-user.target
 
 [Service]
 Type=idle
-ExecStart=/usr/bin/python /home/pi/Clock-Pi/Web/web.py
+ExecStart=/usr/bin/env python /home/pi/Clock-Pi/Web/web.py
 
 [Install]
 WantedBy=multi-user.target
@@ -197,8 +197,9 @@ systemctl enable arduino_shutdown.service -q
 systemctl enable clock.service -q
 systemctl enable web.service -q
 rm /home/pi/Clock-Pi/Music/README.md
-rm -rf /home/pi/Clock-Pi/.git
 rm /home/pi/Clock-Pi/install.sh
+rm /home/pi/Clock-Pi/.gitignore
+rm -rf /home/pi/Clock-Pi/.git
 chown -R pi:pi /home/pi/Clock-Pi/
 stop_spinner $?
 

@@ -4,12 +4,13 @@
 ##### The main script of more-than-an-alarm-clock #####
 #######################################################
 
+
 #######################
 ##### User Config #####
 #######################
 # Alarm File location (Needs to be .wav file)
 alarm_file = "/home/pi/Clock-Pi/Clock/Air_Horn.wav"
-alarm_volume_level = 85 # How loud should the alarm be (%)
+alarm_volume_level = 80 # How loud should the alarm be (%)
 
 # Pin names (No longer than 6 characters)
 pin_twelve_name = "Pin 12"

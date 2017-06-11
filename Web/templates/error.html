@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-	<title>Page Gone</title>
+	<title>{{ title }}</title>
 	<link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
   <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
   <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
@@ -12,11 +12,9 @@
   <meta name="theme-color" content="#ffffff">
 </head>
 <body style="background-color:#181818;color:white;" link="blue" vlink="blue" alink="red">
-	<h2>410 Page Gone</h2>
-	<p>The page you were trying to access is gone.</p>
-	<p>The page you are looking for isn't here, but it was and was moved. Sorry for the inconvenience</p>
+	<h1>{{ title }}</h1>
+	<h2>{{ error }}</h2>
+        <h3>{{ path }}</h3>
 	<h3><a href="{{ url_for('index') }}">Back</a></h3>
-	<p></p>
-	<h6>For the disclaimer, click <a href="{{ url_for('disclaimer') }}">here</a></h6>
 </body>
 </html>

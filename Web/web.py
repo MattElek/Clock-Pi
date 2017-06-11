@@ -11,9 +11,9 @@ from flask import Flask, redirect, render_template, request, url_for
 from psutil import cpu_percent, virtual_memory
 from os import getuid, path, system
 from subprocess import check_output
-from pyfirmata import Arduino, util
 from signal import signal, SIGTERM
 from datetime import datetime
+from serial import Serial
 from smbus import SMBus
 from time import sleep
 
@@ -119,28 +119,13 @@ def sigterm_handler(signal, frame):
     func()
     raise SystemExit
 
-
-
 ########################
 ##### Main program #####
 ########################
 
-#######################################
-##### Start and connect to things #####
-#######################################
-board = Arduino("/dev/ttyACM0") # Connect to Arduino
-sensor = LM75() # Connect to LM75 Temperature sensor
-app = Flask(__name__) # Create flask object
 
-#################################
-##### Create and read files #####
-#################################
-with open("/home/pi/Clock-Pi/alarm_data.csv", "r") as f: # Read alarm file
-    text = f.read()
-    words = text.split(",")
-    alarm_hour = int(words[0])
-    alarm_min = int(words[1])
-    alarm_set = bool(int(words[2]))
+##### Initialize Flask #####
+app = Flask(__name__) # Create flask object
 
 ######################
 ##### Info Panel #####
@@ -178,10 +163,6 @@ def index():
 def control():
     now = datetime.now()
     timeString = now.strftime("%m/%d/%Y, %I:%M:%S %p") # Get the current time
-    global pin_twelve
-    global pin_eleven
-    global pin_ten
-    global pin_nine
     # Get temperature data
     with CPUTemp() as cpu_temp:
         cpu_temp_F = cpu_temp.get_temperature_in_f() # Get CPU Temp in Fahrenheit
@@ -191,6 +172,34 @@ def control():
     est_temp = sensor.toFah(int(ambient) - ((int(cpu_temp_C) - int(ambient)) / 0.8))
 
     memory = virtual_memory() # Get virtual memory usage
+
+    board.write("s")
+    rx_bytes = board.readline()
+    if "True" in rx_bytes:
+        pin_twelve = "true"
+    elif "False" in rx_bytes:
+        pin_twelve = ""
+
+    board.write("d")
+    rx_bytes = board.readline()
+    if "True" in rx_bytes:
+        pin_eleven = "true"
+    elif "False" in rx_bytes:
+        pin_eleven = ""
+
+    board.write("f")
+    rx_bytes = board.readline()
+    if "True" in rx_bytes:
+        pin_ten = "true"
+    elif "False" in rx_bytes:
+        pin_ten = ""
+
+    board.write("g")
+    rx_bytes = board.readline()
+    if "True" in rx_bytes:
+        pin_nine = "true"
+    elif "False" in rx_bytes:
+        pin_nine = ""
 
     templateData = {
         "title": "Control Panel",
@@ -270,29 +279,37 @@ def temperature():
 ################################
 @app.route("/api/info/<pin>/")
 def homekit_pins(pin):
-    global pin_twelve
-    global pin_eleven
-    global pin_ten
-    global pin_nine
+
     if pin == "12":
-        if pin_twelve == True:
+        board.write("s")
+        rx_bytes = board.readline()
+        if "True" in rx_bytes:
             return "1"
-        elif pin_twelve == False:
+        elif "False" in rx_bytes:
             return "0"
+
     elif pin == "11":
-        if pin_eleven == True:
+        board.write("d")
+        rx_bytes = board.readline()
+        if "True" in rx_bytes:
             return "1"
-        elif pin_eleven == False:
+        elif "False" in rx_bytes:
             return "0"
+
     elif pin == "10":
-        if pin_ten == True:
+        board.write("f")
+        rx_bytes = board.readline()
+        if "True" in rx_bytes:
             return "1"
-        elif pin_ten == False:
+        elif "False" in rx_bytes:
             return "0"
+
     elif pin == "9":
-        if pin_nine == True:
+        board.write("g")
+        rx_bytes = board.readline()
+        if "True" in rx_bytes:
             return "1"
-        elif pin_nine == False:
+        elif "False" in rx_bytes:
             return "0"
 
 #######################
@@ -300,82 +317,51 @@ def homekit_pins(pin):
 #######################
 @app.route("/api/<action>/<pin>/", methods=["GET", "HEAD"])
 def pin_control(action, pin):
-    global pin_twelve
-    global pin_eleven
-    global pin_ten
-    global pin_nine
     if str(action) == "on":
         if pin == "12":
-            board.digital[12].write(1)
-            pin_twelve = True
+            board.write("W")
+
         elif pin == "11":
-            board.digital[11].write(1)
-            pin_eleven = True
+            board.write("E")
+
         elif pin == "10":
-            board.digital[10].write(1)
-            pin_ten = True
+            board.write("R")
+
         elif pin == "9":
-            board.digital[9].write(1)
-            pin_nine = True
+            board.write("T")
 
     elif str(action) == "off":
         if pin == "12":
-            board.digital[12].write(0)
-            pin_twelve = False
+            board.write("w")
+
         elif pin == "11":
-            board.digital[11].write(0)
-            pin_eleven = False
+            board.write("e")
+
         elif pin == "10":
-            board.digital[10].write(0)
-            pin_ten = False
+            board.write("r")
+
         elif pin == "9":
-            board.digital[9].write(0)
-            pin_nine = False
+            board.write("t")
+
 
     elif str(action) == "toggle":
         if pin == "12":
-            if pin_twelve == True:
-                board.digital[12].write(0)
-                pin_twelve = False
-            else:
-                board.digital[12].write(1)
-                pin_twelve = True
+            board.write("S")
 
         elif pin == "11":
-            if pin_eleven == True:
-                board.digital[11].write(0)
-                pin_eleven = False
-            else:
-                board.digital[11].write(1)
-                pin_eleven = True
+            board.write("D")
 
         elif pin == "10":
-            if pin_ten == True:
-                board.digital[10].write(0)
-                pin_ten = False
-            else:
-                board.digital[10].write(1)
-                pin_ten = True
+            board.write("F")
 
         elif pin == "9":
-            if pin_nine == True:
-                board.digital[9].write(0)
-                pin_nine = False
-            else:
-                board.digital[9].write(1)
-                pin_nine = True
+            board.write("G")
+
 
     if request.method == "GET":
         return redirect(url_for("control"))
     elif request.method == "HEAD":
-        return '', 200
-
-######################
-##### Disclaimer #####
-######################
-@app.route("/disclaimer/")
-def disclaimer():
-    return render_template("disclaimer.html")
+        return "", 200
 
 ###############################
 ##### Reboot confirmation #####
@@ -429,48 +415,67 @@ def shutdown():
 ##### 404 Page #####
 ####################
 @app.errorhandler(404)
-def page_not_found(e):
-    return render_template("error/404.html"), 404
+def page_not_found(error):
+    error1, error2 = str(error).split(":")
+    templateData = {
+       "title" : error1,
+       "error" : error2,
+       "path" : request.path + " not found"
+    }
+    return render_template("error.html", **templateData), 404
 
 ####################
 ##### 403 Page #####
 ####################
 @app.errorhandler(403)
-def forbidden(e):
-    return render_template("error/403.html"), 403
+def forbidden(error):
+    error1, error2 = str(error).split(":")
+    templateData = {
+       "title" : error1,
+       "error" : error2,
+       "path" : request.path + " forbidden"
+    }
+    return render_template("error.html", **templateData), 403
 
 ####################
 ##### 410 Page #####
 ####################
 @app.errorhandler(410)
-def page_gone(e):
-    return render_template("error/410.html"), 410
+def page_gone(error):
+    error1, error2 = str(error).split(":")
+    templateData = {
+       "title" : error1,
+       "error" : error2,
+       "path" : request.path + " page gone"
+    }
+    return render_template("error.html", **templateData), 410
 
 ####################
 ##### 500 Page #####
 ####################
 @app.errorhandler(500)
-def internal_server_error(e):
-    return render_template("error/500.html"), 500
-
+def internal_server_error(error):
+    error1, error2 = str(error).split(":")
+    templateData = {
+       "title" : error1,
+       "error" : error2,
+       "path" : request.path + " page gone"
+    }
+    return render_template("error.html", **templateData), 500
 
 ##########################
 ##### Start Web Page #####
 ##########################
 try:
-    if __name__ == "__main__":
-        ############################
-        ##### Define Pin State #####
-        ############################
-        global pin_twelve
-        global pin_eleven
-        global pin_ten
-        global pin_nine
-        pin_twelve = False
-        pin_eleven = False
-        pin_ten = False
-        pin_nine = False
 
+    #######################################
+    ##### Start and connect to things #####
+    #######################################
+    board = Serial("/dev/ttyACM0") # Connect to Arduino
+    board.timeout = 2
+    sensor = LM75() # Connect to LM75 Temperature sensor
+
+    if __name__ == "__main__":
         signal(SIGTERM, sigterm_handler)
         app.run(host="0.0.0.0", port=80, debug=False)
 
@@ -484,4 +489,4 @@ except Exception as e:
     print "An error occurred: " + str(e)
 
 finally:
-    board.exit()
+    board.close()
