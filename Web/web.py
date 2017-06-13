@@ -7,7 +7,7 @@
 ############################
 ##### Import libraries #####
 ############################
-from flask import Flask, redirect, render_template, request, url_for
+from flask import abort, Flask, redirect, render_template, request, url_for
 from psutil import cpu_percent, virtual_memory
 from os import getuid, path, system
 from subprocess import check_output
@@ -312,6 +312,9 @@ def homekit_pins(pin):
         elif "False" in rx_bytes:
             return "0"
 
+    else:
+        abort(404)
+
 #######################
 ##### Pin control #####
 #######################
@@ -330,6 +333,9 @@ def pin_control(action, pin):
         elif pin == "9":
             board.write("T")
 
+        else:
+            abort(404)
+
     elif str(action) == "off":
         if pin == "12":
             board.write("w")
@@ -342,6 +348,9 @@ def pin_control(action, pin):
 
         elif pin == "9":
             board.write("t")
+
+        else:
+            abort(404)
 
 
     elif str(action) == "toggle":
@@ -356,6 +365,12 @@ def pin_control(action, pin):
 
         elif pin == "9":
             board.write("G")
+
+        else:
+            abort(404)
+
+    else:
+        abort(404)
 
 
     if request.method == "GET":

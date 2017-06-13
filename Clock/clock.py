@@ -196,7 +196,6 @@ def main():
     ####################################
     lastMin = "00" # Create variable to store previous minute
     timer = False # Create pin 9 timer variable
-    speakers_timer = False # Create speaker timer variable
 
     system("amixer cset numid=1 80% > /dev/null 2>&1") # Set volume level
     volume_level = 80
@@ -224,14 +223,14 @@ def main():
                 lastMin = "00" # Update display
                 ten_mins = 11 # Yes, eleven because we update display and subtract one immediately
                 pin_change(12, "on") # Turn lights on
-                pin_change(11, "on")
+                pin_change(11, "off")
                 pin_change(10, "on") # Turn speaker on
-                pin_change(9, "off")
+                pin_change(9, "on")
                 try:
                     pygame.mixer.init() # Start pygame.mixer (Audio)
                     pygame.mixer.music.load(alarm_file) # Load alarm sound
                 except pygame.error:
-                    pin_change(11, "off")
+                    pin_change(12, "off")
                     display_time()
                     draw.text((2, 10), " Menu   Info   Stuff   Lights", fill=BLACK, font=menu_font)
                     draw.text((4, 40), "Incorrect/missing audio file", fill=BLACK, font=menu_font)
@@ -312,13 +311,8 @@ def main():
         ###############################
         if timer == True:
             if check_time == turn_off_led:
-                pin_change(9, "off")
-                timer = False
-
-        if speakers_timer == True:
-            if check_time == turn_off_speakers:
                 pin_change(11, "off")
-                speakers_timer = False
+                timer = False
 
         ##########################
         ##### Update display #####
@@ -392,7 +386,7 @@ def main():
                         ##################
                         if GPIO.input(SW3) == False:
                             display_time()
-                            draw.text((2, 10), " Menu   Info   Stuff   Lights", fill=BLACK, font=menu_font)
+                            draw.text((2, 10), " Back  Alarm  Power", fill=BLACK, font=menu_font)
                             if alarm_set == True:
                                 alarm_set = False
                                 with open("/home/pi/Clock-Pi/alarm_data.csv", "w") as f:
@@ -422,7 +416,7 @@ def main():
                                 alarm_min = int(words[1])
                                 alarm_set = bool(int(words[2]))
                             display_time()
-                            draw.text((2, 10), " Menu   Info   Stuff   Lights", fill=BLACK, font=menu_font)
+                            draw.text((2, 10), " Back  Alarm  Power", fill=BLACK, font=menu_font)
                             if alarm_set == True:
                                 draw.text((4, 40), "Alarm on at " + str(alarm_hour) + ":" + str(alarm_min), fill=BLACK, font=menu_font)
                             elif alarm_set == False:
@@ -449,7 +443,7 @@ def main():
                         ################
                         if GPIO.input(SW4) == False:
                             display_time()
-                            draw.text((2, 10), " Back  Alarm  Power  Reload", fill=BLACK, font=menu_font)
+                            draw.text((2, 10), " Back  Alarm  Power", fill=BLACK, font=menu_font)
                             papirus.display(image)
                             papirus.update()
                             break
@@ -818,7 +812,7 @@ def main():
                 #################
                 if GPIO.input(SW1) == False:
                     speakers_timer = False
-                    pin_change(11, "on") # Turn speaker on
+                    pin_change(12, "on") # Turn speaker on
                     audio_file = "Loading..."
                     lastMin = "00" # Update display
                     pygame.mixer.init() # Start pygame.mixer (Audio)
