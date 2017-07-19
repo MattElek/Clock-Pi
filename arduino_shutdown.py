@@ -34,6 +34,7 @@ def main():
     ##############################
     board = Serial("/dev/ttyACM0") # Connect to Arduino
     board.timeout = 2
+    sleep(5)
     board.write("Q")
 
     while True:
@@ -64,6 +65,7 @@ try:
         main()
 
 except KeyboardInterrupt:
+    print ""
     print "You pressed CTRL+C"
 
 except SystemExit:
@@ -73,4 +75,4 @@ except Exception as e:
     print "An error occurred: " + str(e)
 
 finally:
-    board.exit()
+    board.close()

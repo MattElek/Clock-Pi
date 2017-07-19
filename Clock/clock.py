@@ -21,10 +21,9 @@ pin_nine_name = "Pin 9" # This pin can turn off with a timer
 ############################
 ##### Import Libraries #####
 ############################
+from os import getuid, listdir, popopen, system
 from psutil import cpu_percent, virtual_memory
 from datetime import datetime, timedelta
-from os import getuid, listdir, system
-from subprocess import check_output
 from signal import signal, SIGTERM
 from random import choice, randint
 from papirus import Papirus
@@ -37,42 +36,20 @@ from time import sleep
 from PIL import Image
 import pygame.mixer
 
-########################################
-##### Define class to get CPU temp #####
-########################################
-class CPUTemp:
-    def __init__(self, tempfilename = "/sys/class/thermal/thermal_zone0/temp"):
-        self.tempfilename = tempfilename
+#################################################
+##### Define class to get Raspberry Pi temp #####
+#################################################
+def get_cpu_temp():
+    with open("/sys/class/thermal/thermal_zone0/temp", "r") as tempfile:
+        cpu_temp = int(tempfile.read()) / 1000
+    cpu_temp = (cpu_temp * (9.0/5.0)) + 32.0
+    return str(cpu_temp)
 
-    def __enter__(self):
-        self.open()
-        return self
-
-    def open(self):
-        self.tempfile = open(self.tempfilename, "r")
-
-    def read(self):
-        self.tempfile.seek(0)
-        return self.tempfile.read().rstrip()
-
-    def get_temperature(self):
-        return self.get_temperature_in_c()
-
-    def get_temperature_in_c(self):
-        tempraw = self.read()
-        return float(tempraw[:-3] + "." + tempraw[-3:])
-
-    def get_temperature_in_f(self):
-        return self.convert_c_to_f(self.get_temperature_in_c())
-
-    def convert_c_to_f(self, c):
-        return c * 9.0 / 5.0 + 32.0
-
-    def __exit__(self, type, value, traceback):
-        self.close()
-
-    def close(self):
-        self.tempfile.close()
+def get_gpu_temp():
+    with popen("/opt/vc/bin/vcgencmd measure_temp") as tempfile:
+        gpu_temp = int(tempfile.read().replace("temp=", "").split(".")[0])
+    gpu_temp = (gpu_temp * (9.0/5.0)) + 32.0
+    return str(gpu_temp)
 
 #########################################
 ##### Define class to get LM75 temp #####
@@ -112,16 +89,11 @@ class LM75(object):
 ##### Define class to get uptime #####
 ######################################
 def get_up_stats():
-    try:
-        s = check_output(["uptime"])
-        load_split = s.split("load average: ")
-        load_five = float(load_split[1].split(",")[1])
-        up = load_split[0]
-        up_pos = up.rfind(",",0,len(up)-4)
-        up = up[:up_pos].split("up ")[1]
-        return ( up , load_five )
-    except:
-        return 0
+    with open('/proc/uptime', 'r') as f:
+        uptime_seconds = float(f.readline().split()[0])
+        uptime_string = str(timedelta(seconds = uptime_seconds))
+        uptime_string = uptime_string.split(".")[0]
+    return uptime_string
 
 ########################
 ##### Main program #####
@@ -219,17 +191,17 @@ def main():
         ###############################
         if alarm_set == True: # Is alarm set
             if (check_time == str(alarm_hour) + str(alarm_min)) or (alt_check_time == str(alarm_hour) + str(alarm_min)): # Is it time for the alarm to go off
-                speakers_timer = False
                 lastMin = "00" # Update display
                 ten_mins = 11 # Yes, eleven because we update display and subtract one immediately
-                pin_change(12, "on") # Turn lights on
+                pin_change(12, "on") # Turn speaker on
                 pin_change(11, "off")
-                pin_change(10, "on") # Turn speaker on
+                pin_change(10, "on") # Turn lights on
                 pin_change(9, "on")
                 try:
                     pygame.mixer.init() # Start pygame.mixer (Audio)
                     pygame.mixer.music.load(alarm_file) # Load alarm sound
                 except pygame.error:
+                    alarm_set = False
                     pin_change(12, "off")
                     display_time()
                     draw.text((2, 10), " Menu   Info   Stuff   Lights", fill=BLACK, font=menu_font)
@@ -259,6 +231,7 @@ def main():
 
                     # If alarm turned off, stop playing audio and exit
                     if GPIO.input(SW4) == False:
+                        alarm_set = False
                         pygame.mixer.music.stop()
                         pygame.mixer.quit()
                         display_time()
@@ -335,6 +308,7 @@ def main():
                     alarm_min = int(words[1])
                     alarm_set = bool(int(words[2]))
 
+
         ################################
         ##### Button functionality #####
         ################################
@@ -365,7 +339,7 @@ def main():
                 #################
                 if GPIO.input(SW3) == False:
                     display_time()
-                    draw.text((2, 10), " Back   Toggle   Status", fill=BLACK, font=menu_font)
+                    draw.text((2, 10), " Back  Toggle  Set  Toggle", fill=BLACK, font=menu_font)
                     papirus.display(image)
                     papirus.update()
                     count = 0
@@ -385,6 +359,12 @@ def main():
                         ##### Toggle #####
                         ##################
                         if GPIO.input(SW3) == False:
+                            with open("/home/pi/Clock-Pi/alarm_data.csv", "r") as f:
+                                text = f.read()
+                                words = text.split(",")
+                                alarm_hour = int(words[0])
+                                alarm_min = int(words[1])
+                                alarm_set = bool(int(words[2]))
                             display_time()
                             draw.text((2, 10), " Back  Alarm  Power", fill=BLACK, font=menu_font)
                             if alarm_set == True:
@@ -393,22 +373,105 @@ def main():
                                     f.seek(0)
                                     new_text = str(alarm_hour) + "," + str(alarm_min) + ",0"
                                     f.write(new_text)
-                                draw.text((4, 40), "Alarm off at " + str(alarm_hour) + ":" + str(alarm_min), fill=BLACK, font=menu_font)
+                                draw.text((4, 40), "Alarm not set for " + str(alarm_hour) + ":" + str(alarm_min), fill=BLACK, font=menu_font)
                             elif alarm_set == False:
                                 alarm_set = True
                                 with open("/home/pi/Clock-Pi/alarm_data.csv", "w") as f:
                                     f.seek(0)
                                     new_text = str(alarm_hour) + "," + str(alarm_min) + ",1"
                                     f.write(new_text)
-                                draw.text((4, 40), "Alarm on at " + str(alarm_hour) + ":" + str(alarm_min), fill=BLACK, font=menu_font)
+                                draw.text((4, 40), "Alarm set for " + str(alarm_hour) + ":" + str(alarm_min), fill=BLACK, font=menu_font)
                             papirus.display(image)
                             papirus.update()
                             break
 
+                        #####################
+                        ##### Set alarm #####
+                        #####################
+                        if GPIO.input(SW1) == False:
+                            with open("/home/pi/Clock-Pi/alarm_data.csv", "r") as f:
+                                text = f.read()
+                                words = text.split(",")
+                                alarm_hour = int(words[0])
+                                alarm_min = int(words[1])
+                                alarm_set = bool(int(words[2]))
+
+                            set_mode = "hour"
+                            display_time()
+                            draw.text((2, 10), " Back  Select  Up  Down", fill=BLACK, font=menu_font)
+                            draw.text((4, 40), "(Setting " + set_mode + ") Hour: " + str(alarm_hour) + " Min: " + str(alarm_min), fill=BLACK, font=menu_font)
+                            papirus.display(image)
+                            papirus.update()
+                            count = 0
+                            while (count < 60):
+
+                                ################
+                                ##### Back #####
+                                ################
+                                if GPIO.input(SW4) == False:
+                                    display_time()
+                                    draw.text((2, 10), " Back  Toggle  Set  Toggle", fill=BLACK, font=menu_font)
+                                    papirus.display(image)
+                                    papirus.update()
+                                    break
+
+                                ##################
+                                ##### Select #####
+                                ##################
+                                if GPIO.input(SW3) == False:
+                                    display_time()
+                                    draw.text((2, 10), " Back  Select  Up  Down", fill=BLACK, font=menu_font)
+                                    set_mode = "minute"
+                                    draw.text((4, 40), "(Setting " + set_mode + ") Hour: " + str(alarm_hour) + " Min: " + str(alarm_min), fill=BLACK, font=menu_font)
+                                    papirus.display(image)
+                                    papirus.partial_update()
+                                    count = 0
+
+                                # Time up
+                                if GPIO.input(SW2) == False:
+                                    display_time()
+                                    draw.text((2, 10), " Back  Select  Up  Down", fill=BLACK, font=menu_font)
+                                    if set_mode == "hour":
+                                        alarm_hour += 1
+                                        if alarm_hour > 24:
+                                            alarm_hour = 24
+                                    elif set_mode == "minute":
+                                        alarm_min += 1
+                                        if alarm_min > 24:
+                                            alarm_min = 24
+
+                                    draw.text((4, 40), "(Setting " + set_mode + ") Hour: " + str(alarm_hour) + " Min: " + str(alarm_min), fill=BLACK, font=menu_font)
+                                    papirus.display(image)
+                                    papirus.partial_update()
+                                    count = 0
+
+                                # Time Down
+                                if GPIO.input(SW1) == False:
+                                    display_time()
+                                    draw.text((2, 10), " Back  Select  Up  Down", fill=BLACK, font=menu_font)
+                                    if set_mode == "hour":
+                                        alarm_hour -= 1
+                                        if alarm_hour < 1:
+                                            alarm_hour = 1
+                                    elif set_mode == "minute":
+                                        alarm_min -= 1
+                                        if alarm_min < 1:
+                                            alarm_min = 1
+
+                                    draw.text((4, 40), "(Setting " + set_mode + ") Hour: " + str(alarm_hour) + " Min: " + str(alarm_min), fill=BLACK, font=menu_font)
+                                    papirus.display(image)
+                                    papirus.partial_update()
+                                    count = 0
+
+
+                                sleep(1)
+                                count = count + 1
+
+
                         ##################
-                        ##### Reload #####
+                        ##### Status #####
                         ##################
-                        if GPIO.input(SW2) == False:
+                        if GPIO.input(SW1) == False:
                             with open("/home/pi/Clock-Pi/alarm_data.csv", "r") as f:
                                 text = f.read()
                                 words = text.split(",")
@@ -427,6 +490,7 @@ def main():
 
                         sleep(1)
                         count = count + 1
+
                 ###################
                 ###### Power ######
                 ###################
@@ -547,7 +611,7 @@ def main():
                         if GPIO.input(SW1) == False:
                             display_time()
                             draw.text((2, 10), " Back   More   Temp", fill=BLACK, font=menu_font)
-                            draw.text((4, 40), "Uptime: " + get_up_stats()[0], fill=BLACK, font=menu_font)
+                            draw.text((4, 40), "Uptime: " + get_up_stats(), fill=BLACK, font=menu_font)
                             papirus.display(image)
                             papirus.update()
                             break
@@ -560,7 +624,7 @@ def main():
                 ################
                 if GPIO.input(SW2) == False:
                     display_time()
-                    draw.text((2, 10), " Back  LM75  CPU  EST.", fill=BLACK, font=menu_font)
+                    draw.text((2, 10), " Back  CPU  GPU  LM75", fill=BLACK, font=menu_font)
                     papirus.display(image)
                     papirus.update()
                     count = 0
@@ -576,27 +640,35 @@ def main():
                             papirus.update()
                             break
 
-                        #####################
-                        ##### LM75 Temp #####
-                        #####################
+                        ####################
+                        ##### CPU Temp #####
+                        ####################
                         if GPIO.input(SW3) == False:
                             display_time()
                             draw.text((2, 10), " Back   More   Temp", fill=BLACK, font=menu_font)
-                            draw.text((4, 40), "LM75 Sensor temp: " + str(sensor.getTemp()) + "F", fill=BLACK, font=menu_font)
+                            draw.text((4, 40), "CPU Temp: " + get_cpu_temp() + "F", fill=BLACK, font=menu_font)
                             papirus.display(image)
                             papirus.update()
                             break
 
                         ####################
-                        ##### CPU Temp #####
+                        ##### GPU Temp #####
                         ####################
                         if GPIO.input(SW2) == False:
-                            # Get temperature data
-                            with CPUTemp() as cpu_temp:
-                                cpu_temp_F = cpu_temp.get_temperature_in_f() # Get CPU Temp in Fahrenheit
                             display_time()
                             draw.text((2, 10), " Back   More   Temp", fill=BLACK, font=menu_font)
-                            draw.text((4, 40), "CPU Temp: " + str(cpu_temp_F) + "F", fill=BLACK, font=menu_font)
+                            draw.text((4, 40), "GPU Temp: " + get_gpu_temp() + "F", fill=BLACK, font=menu_font)
+                            papirus.display(image)
+                            papirus.update()
+                            break
+
+                        #####################
+                        ##### LM75 Temp #####
+                        #####################
+                        if GPIO.input(SW1) == False:
+                            display_time()
+                            draw.text((2, 10), " Back   More   Temp", fill=BLACK, font=menu_font)
+                            draw.text((4, 40), "LM75 Sensor temp: " + str(sensor.getTemp()) + "F", fill=BLACK, font=menu_font)
                             papirus.display(image)
                             papirus.update()
                             break
@@ -686,20 +758,19 @@ def main():
                         ##### Test Alarm #####
                         ######################
                         if GPIO.input(SW3) == False:
-                            speakers_timer = False
                             lastMin = "00" # Update display
                             ten_mins = 11 # Yes, eleven because we update display and subtract one immediately
-                            pin_change(12, "on") # Turn lights on
-                            pin_change(11, "on")
-                            pin_change(10, "on") # Turn speaker on
-                            pin_change(9, "off")
+                            pin_change(12, "on") # Turn speaker on
+                            pin_change(11, "off")
+                            pin_change(10, "on") # Turn lights on
+                            pin_change(9, "on")
                             try:
                                 pygame.mixer.init() # Start pygame.mixer (Audio)
                                 pygame.mixer.music.load(alarm_file) # Load alarm sound
                             except pygame.error:
-                                pin_change(11, "off")
+                                pin_change(12, "off")
                                 display_time()
-                                draw.text((2, 10), " Back   Test   Up   Down", fill=BLACK, font=menu_font)
+                                draw.text((2, 10), " Menu   Info   Stuff   Lights", fill=BLACK, font=menu_font)
                                 draw.text((4, 40), "Incorrect/missing audio file", fill=BLACK, font=menu_font)
                                 papirus.display(image)
                                 papirus.update()
@@ -729,7 +800,7 @@ def main():
                                     pygame.mixer.music.stop()
                                     pygame.mixer.quit()
                                     display_time()
-                                    draw.text((2, 10), " Back   Test   Up   Down", fill=BLACK, font=menu_font)
+                                    draw.text((2, 10), " Menu   Info   Stuff   Lights", fill=BLACK, font=menu_font)
                                     draw.text((4, 40), "Alarm turned off", fill=BLACK, font=menu_font)
                                     papirus.display(image)
                                     papirus.update()
@@ -777,7 +848,7 @@ def main():
                         #####################
                         if GPIO.input(SW2) == False:
                             count = 0
-                            volume_level = volume_level + 2
+                            volume_level +=+ 2
                             if volume_level > 100:
                                 volume_level = 100
                             system("amixer cset numid=1 " + str(volume_level) + "% > /dev/null 2>&1")
@@ -793,7 +864,7 @@ def main():
                         #######################
                         if GPIO.input(SW1) == False:
                             count = 0
-                            volume_level = volume_level - 2
+                            volume_level -= 2
                             if volume_level < 0:
                                 volume_level = 0
                             system("amixer cset numid=1 " + str(volume_level) + "% > /dev/null 2>&1")
@@ -811,7 +882,6 @@ def main():
                 ##### Music #####
                 #################
                 if GPIO.input(SW1) == False:
-                    speakers_timer = False
                     pin_change(12, "on") # Turn speaker on
                     audio_file = "Loading..."
                     lastMin = "00" # Update display
@@ -869,7 +939,7 @@ def main():
 
                         # Volume Up
                         if GPIO.input(SW2) == False:
-                            volume_level = volume_level + 2
+                            volume_level += 2
                             if volume_level > 100:
                                 volume_level = 100
                             system("amixer cset numid=1 " + str(volume_level) + "% > /dev/null 2>&1")
@@ -882,7 +952,7 @@ def main():
 
                         # Volume Down
                         if GPIO.input(SW1) == False:
-                            volume_level = volume_level - 2
+                            volume_level -= 2
                             if volume_level < 0:
                                 volume_level = 0
                             system("amixer cset numid=1 " + str(volume_level) + "% > /dev/null 2>&1")
@@ -922,7 +992,7 @@ def main():
                 ################
                 if GPIO.input(SW3) == False:
                     display_time()
-                    draw.text((2, 10), " Back  " + pin_eleven_name + "  " + pin_twelve_name + "   Off", fill=BLACK, font=menu_font)
+                    draw.text((2, 10), " Back  " + pin_eleven_name + "  " + pin_twelve_name + "   All", fill=BLACK, font=menu_font)
                     papirus.display(image)
                     papirus.update()
                     count = 0
@@ -954,7 +1024,7 @@ def main():
                                 ################
                                 if GPIO.input(SW4) == False:
                                     display_time()
-                                    draw.text((2, 10), " Back  " + pin_eleven_name + "  " + pin_twelve_name + "   Off", fill=BLACK, font=menu_font)
+                                    draw.text((2, 10), " Back  " + pin_eleven_name + "  " + pin_twelve_name + "   All", fill=BLACK, font=menu_font)
                                     papirus.display(image)
                                     papirus.update()
                                     break
@@ -964,7 +1034,7 @@ def main():
                                 #############################
                                 if GPIO.input(SW3) == False:
                                     display_time()
-                                    draw.text((2, 10), " Back  " + pin_eleven_name + "  " + pin_twelve_name + "   Off", fill=BLACK, font=menu_font)
+                                    draw.text((2, 10), " Back  " + pin_eleven_name + "  " + pin_twelve_name + "   All", fill=BLACK, font=menu_font)
                                     draw.text((4, 40), pin_eleven_name + " toggled", fill=BLACK, font=menu_font)
                                     papirus.display(image)
                                     papirus.update()
@@ -980,7 +1050,7 @@ def main():
                                     one_hour_from_now = datetime.now() + timedelta(hours=1)
                                     turn_off_led = one_hour_from_now.strftime("%-H%-M")
                                     display_time()
-                                    draw.text((2, 10), " Back  " + pin_eleven_name + "  " + pin_twelve_name + "   Off", fill=BLACK, font=menu_font)
+                                    draw.text((2, 10), " Back  " + pin_eleven_name + "  " + pin_twelve_name + "   All", fill=BLACK, font=menu_font)
                                     draw.text((4, 40), pin_eleven_name + " off at: " + one_hour_from_now.strftime("%-I:%M %p"), fill=BLACK, font=menu_font)
                                     papirus.display(image)
                                     papirus.update()
@@ -995,7 +1065,7 @@ def main():
                                     two_hours_from_now = datetime.now() + timedelta(hours=2)
                                     turn_off_led = two_hours_from_now.strftime("%-H%-M")
                                     display_time()
-                                    draw.text((2, 10), " Back  " + pin_eleven_name + "  " + pin_twelve_name + "   Off", fill=BLACK, font=menu_font)
+                                    draw.text((2, 10), " Back  " + pin_eleven_name + "  " + pin_twelve_name + "   All", fill=BLACK, font=menu_font)
                                     draw.text((4, 40), pin_eleven_name + " off at: " + two_hours_from_now.strftime("%-I:%M %p"), fill=BLACK, font=menu_font)
                                     papirus.display(image)
                                     papirus.update()
@@ -1014,26 +1084,78 @@ def main():
                             draw.text((4, 40), pin_twelve_name + " toggled", fill=BLACK, font=menu_font)
                             papirus.display(image)
                             papirus.update()
-                            speakers_timer = False
                             pin_change(12, "toggle")
                             break
 
-                        ###################
-                        ##### All off #####
-                        ###################
+                        ###############
+                        ##### All #####
+                        ###############
                         if GPIO.input(SW1) == False:
                             display_time()
-                            draw.text((2, 10), " Back  More  " + pin_ten_name + "   " +  pin_nine_name, fill=BLACK, font=menu_font)
-                            draw.text((4, 40), "All off", fill=BLACK, font=menu_font)
+                            draw.text((2, 10), " Back  On  Off  Toggle", fill=BLACK, font=menu_font)
                             papirus.display(image)
                             papirus.update()
-                            pin_change(12, "off")
-                            pin_change(11, "off")
-                            pin_change(10, "off")
-                            pin_change(9, "off")
-                            speakers_timer = False
-                            timer = False
-                            break
+                            count = 0
+                            while (count < 30):
+
+                                ################
+                                ##### Back #####
+                                ################
+                                if GPIO.input(SW4) == False:
+                                    display_time()
+                                    draw.text((2, 10), " Back  " + pin_eleven_name + "  " + pin_twelve_name + "   All", fill=BLACK, font=menu_font)
+                                    papirus.display(image)
+                                    papirus.update()
+                                    break
+
+                                ##################
+                                ##### All on #####
+                                ##################
+                                if GPIO.input(SW3) == False:
+                                    display_time()
+                                    draw.text((2, 10), " Back  " + pin_eleven_name + "  " + pin_twelve_name + "   All", fill=BLACK, font=menu_font)
+                                    draw.text((4, 40), "All on", fill=BLACK, font=menu_font)
+                                    papirus.display(image)
+                                    papirus.update()
+                                    timer = False
+                                    pin_change(12, "on")
+                                    pin_change(11, "on")
+                                    pin_change(10, "on")
+                                    pin_change(9, "on")
+                                    break
+
+                                ###################
+                                ##### All off #####
+                                ###################
+                                if GPIO.input(SW2) == False:
+                                    display_time()
+                                    draw.text((2, 10), " Back  " + pin_eleven_name + "  " + pin_twelve_name + "   All", fill=BLACK, font=menu_font)
+                                    draw.text((4, 40), " All off", fill=BLACK, font=menu_font)
+                                    papirus.display(image)
+                                    papirus.update()
+                                    pin_change(12, "off")
+                                    pin_change(11, "off")
+                                    pin_change(10, "off")
+                                    pin_change(9, "off")
+                                    break
+
+                                ######################
+                                ##### All toggle #####
+                                ######################
+                                if GPIO.input(SW1) == False:
+                                    display_time()
+                                    draw.text((2, 10), " Back  " + pin_eleven_name + "  " + pin_twelve_name + "   All", fill=BLACK, font=menu_font)
+                                    draw.text((4, 40), "All toggled", fill=BLACK, font=menu_font)
+                                    papirus.display(image)
+                                    papirus.update()
+                                    pin_change(12, "toggle")
+                                    pin_change(11, "toggle")
+                                    pin_change(10, "toggle")
+                                    pin_change(9, "toggle")
+                                    break
+
+                                sleep(1)
+                                count = count + 1
 
                         sleep(1)
                         count = count + 1

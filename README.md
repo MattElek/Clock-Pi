@@ -39,13 +39,18 @@ You can configure the pin names to personal preference in:
 2. At the top of clock.py (located in Clock-Pi/Clock). There are some variables there that you can change.
 3. In control.html (located in Web/templates/). Near the middle, you can change the pin names for the website.
 
-**Raspberry Pi**
+**Audio**
 The Raspberry Pi has a built-in audio DAC that is connected to the device's headphone jack. An updated audio driver has greatly improved the quality of the output – see [Shairport-Sync issue #525](https://github.com/mikebrady/shairport-sync/issues/525) for details. To activate the updated driver, add the line:
 ```
 audio_pwm_mode=2
 ```
 to `/boot/config.txt` and reboot.
 Apart from a loud click when used for the first time after power-up, it is quite adequate for casual listening.
+
+## Pictures
+
+ADD PICTURES HERE
+
 
 ## License
 
