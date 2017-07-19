@@ -13,10 +13,10 @@ alarm_file = "/home/pi/Clock-Pi/Clock/Air_Horn.wav"
 alarm_volume_level = 80 # How loud should the alarm be (%)
 
 # Pin names (No longer than 6 characters)
-pin_twelve_name = "Pin 12"
-pin_eleven_name = "Pin 11" # Speaker relay pin
+pin_twelve_name = "Pin 12" # Speaker relay pin
+pin_eleven_name = "Pin 11" # This pin can turn off with a timer
 pin_ten_name = "Pin 10"
-pin_nine_name = "Pin 9" # This pin can turn off with a timer
+pin_nine_name = "Pin 9"
 
 ############################
 ##### Import Libraries #####
@@ -194,7 +194,7 @@ def main():
                 lastMin = "00" # Update display
                 ten_mins = 11 # Yes, eleven because we update display and subtract one immediately
                 pin_change(12, "on") # Turn speaker on
-                pin_change(11, "off")
+                pin_change(11, "on")
                 pin_change(10, "on") # Turn lights on
                 pin_change(9, "on")
                 try:
@@ -245,6 +245,7 @@ def main():
                     # If snoozed, stop playing audio and wait five minutes
                     if GPIO.input(SW3) == False:
                         pygame.mixer.music.stop()
+                        ten_mins = 11
                         five_mins = 5
                         lastMin = 0
 
@@ -277,6 +278,8 @@ def main():
                             sleep(1)
 
                         lastMin = 0
+
+                pin_change(12, "off")
 
 
         ###############################
@@ -339,7 +342,7 @@ def main():
                 #################
                 if GPIO.input(SW3) == False:
                     display_time()
-                    draw.text((2, 10), " Back  Toggle  Set  Toggle", fill=BLACK, font=menu_font)
+                    draw.text((2, 10), " Back  Toggle  Set  Status", fill=BLACK, font=menu_font)
                     papirus.display(image)
                     papirus.update()
                     count = 0
@@ -398,20 +401,20 @@ def main():
 
                             set_mode = "hour"
                             display_time()
-                            draw.text((2, 10), " Back  Select  Up  Down", fill=BLACK, font=menu_font)
+                            draw.text((2, 10), " Save  Select  Up  Down", fill=BLACK, font=menu_font)
                             draw.text((4, 40), "(" + set_mode + ") Hour: " + str(alarm_hour) + " Min: " + str(alarm_min), fill=BLACK, font=menu_font)
                             papirus.display(image)
                             papirus.update()
                             count = 0
-                            while (count < 60):
+                            while (count < 600):
 
                                 ################
-                                ##### Back #####
+                                ##### Save #####
                                 ################
                                 if GPIO.input(SW4) == False:
 
                                     display_time()
-                                    draw.text((2, 10), " Back  Alarm  Power", fill=BLACK, font=menu_font)
+                                    draw.text((2, 10), " Back  Toggle  Set  Status", fill=BLACK, font=menu_font)
 
                                     if alarm_set == True:
                                         alarm_set = False
@@ -442,7 +445,7 @@ def main():
                                         set_mode = "hour"
 
                                     display_time()
-                                    draw.text((2, 10), " Back  Select  Up  Down", fill=BLACK, font=menu_font)
+                                    draw.text((2, 10), " Save  Select  Up  Down", fill=BLACK, font=menu_font)
                                     draw.text((4, 40), "(" + set_mode + ") Hour: " + str(alarm_hour) + " Min: " + str(alarm_min), fill=BLACK, font=menu_font)
                                     papirus.display(image)
                                     papirus.partial_update()
@@ -451,15 +454,15 @@ def main():
                                 # Time up
                                 if GPIO.input(SW2) == False:
                                     display_time()
-                                    draw.text((2, 10), " Back  Select  Up  Down", fill=BLACK, font=menu_font)
+                                    draw.text((2, 10), " Save  Select  Up  Down", fill=BLACK, font=menu_font)
                                     if set_mode == "hour":
                                         alarm_hour += 1
                                         if alarm_hour > 24:
                                             alarm_hour = 24
                                     elif set_mode == "minute":
                                         alarm_min += 1
-                                        if alarm_min > 24:
-                                            alarm_min = 24
+                                        if alarm_min > 60:
+                                            alarm_min = 60
 
                                     draw.text((4, 40), "(" + set_mode + ") Hour: " + str(alarm_hour) + " Min: " + str(alarm_min), fill=BLACK, font=menu_font)
                                     papirus.display(image)
@@ -469,7 +472,7 @@ def main():
                                 # Time Down
                                 if GPIO.input(SW1) == False:
                                     display_time()
-                                    draw.text((2, 10), " Back  Select  Up  Down", fill=BLACK, font=menu_font)
+                                    draw.text((2, 10), " Save  Select  Up  Down", fill=BLACK, font=menu_font)
                                     if set_mode == "hour":
                                         alarm_hour -= 1
                                         if alarm_hour < 1:
@@ -485,7 +488,7 @@ def main():
                                     count = 0
 
 
-                                sleep(1)
+                                sleep(0.1)
                                 count = count + 1
 
 
@@ -782,7 +785,7 @@ def main():
                             lastMin = "00" # Update display
                             ten_mins = 11 # Yes, eleven because we update display and subtract one immediately
                             pin_change(12, "on") # Turn speaker on
-                            pin_change(11, "off")
+                            pin_change(11, "on")
                             pin_change(10, "on") # Turn lights on
                             pin_change(9, "on")
                             try:
@@ -831,6 +834,7 @@ def main():
                                 # If snoozed, stop playing audio and wait five minutes
                                 if GPIO.input(SW3) == False:
                                     pygame.mixer.music.stop()
+                                    ten_mins = 11
                                     five_mins = 5
                                     lastMin = 0
 
@@ -863,6 +867,8 @@ def main():
                                         sleep(1)
 
                                     lastMin = 0
+
+                            pin_change(12, "off")
 
                         #####################
                         ##### Volume Up #####
