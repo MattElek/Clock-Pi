@@ -21,7 +21,7 @@ pin_nine_name = "Pin 9" # This pin can turn off with a timer
 ############################
 ##### Import Libraries #####
 ############################
-from os import getuid, listdir, popopen, system
+from os import getuid, listdir, popen, system
 from psutil import cpu_percent, virtual_memory
 from datetime import datetime, timedelta
 from signal import signal, SIGTERM
@@ -388,7 +388,7 @@ def main():
                         #####################
                         ##### Set alarm #####
                         #####################
-                        if GPIO.input(SW1) == False:
+                        if GPIO.input(SW2) == False:
                             with open("/home/pi/Clock-Pi/alarm_data.csv", "r") as f:
                                 text = f.read()
                                 words = text.split(",")
@@ -399,7 +399,7 @@ def main():
                             set_mode = "hour"
                             display_time()
                             draw.text((2, 10), " Back  Select  Up  Down", fill=BLACK, font=menu_font)
-                            draw.text((4, 40), "(Setting " + set_mode + ") Hour: " + str(alarm_hour) + " Min: " + str(alarm_min), fill=BLACK, font=menu_font)
+                            draw.text((4, 40), "(" + set_mode + ") Hour: " + str(alarm_hour) + " Min: " + str(alarm_min), fill=BLACK, font=menu_font)
                             papirus.display(image)
                             papirus.update()
                             count = 0
@@ -409,8 +409,25 @@ def main():
                                 ##### Back #####
                                 ################
                                 if GPIO.input(SW4) == False:
+
                                     display_time()
-                                    draw.text((2, 10), " Back  Toggle  Set  Toggle", fill=BLACK, font=menu_font)
+                                    draw.text((2, 10), " Back  Alarm  Power", fill=BLACK, font=menu_font)
+
+                                    if alarm_set == True:
+                                        alarm_set = False
+                                        with open("/home/pi/Clock-Pi/alarm_data.csv", "w") as f:
+                                            f.seek(0)
+                                            new_text = str(alarm_hour) + "," + str(alarm_min) + ",0"
+                                            f.write(new_text)
+                                        draw.text((4, 40), "Alarm not set for " + str(alarm_hour) + ":" + str(alarm_min), fill=BLACK, font=menu_font)
+                                    elif alarm_set == False:
+                                        alarm_set = True
+                                        with open("/home/pi/Clock-Pi/alarm_data.csv", "w") as f:
+                                            f.seek(0)
+                                            new_text = str(alarm_hour) + "," + str(alarm_min) + ",1"
+                                            f.write(new_text)
+                                        draw.text((4, 40), "Alarm set for " + str(alarm_hour) + ":" + str(alarm_min), fill=BLACK, font=menu_font)
+
                                     papirus.display(image)
                                     papirus.update()
                                     break
@@ -419,10 +436,14 @@ def main():
                                 ##### Select #####
                                 ##################
                                 if GPIO.input(SW3) == False:
+                                    if set_mode == "hour":
+                                        set_mode = "minute"
+                                    elif set_mode == "minute":
+                                        set_mode = "hour"
+
                                     display_time()
                                     draw.text((2, 10), " Back  Select  Up  Down", fill=BLACK, font=menu_font)
-                                    set_mode = "minute"
-                                    draw.text((4, 40), "(Setting " + set_mode + ") Hour: " + str(alarm_hour) + " Min: " + str(alarm_min), fill=BLACK, font=menu_font)
+                                    draw.text((4, 40), "(" + set_mode + ") Hour: " + str(alarm_hour) + " Min: " + str(alarm_min), fill=BLACK, font=menu_font)
                                     papirus.display(image)
                                     papirus.partial_update()
                                     count = 0
@@ -440,7 +461,7 @@ def main():
                                         if alarm_min > 24:
                                             alarm_min = 24
 
-                                    draw.text((4, 40), "(Setting " + set_mode + ") Hour: " + str(alarm_hour) + " Min: " + str(alarm_min), fill=BLACK, font=menu_font)
+                                    draw.text((4, 40), "(" + set_mode + ") Hour: " + str(alarm_hour) + " Min: " + str(alarm_min), fill=BLACK, font=menu_font)
                                     papirus.display(image)
                                     papirus.partial_update()
                                     count = 0
@@ -458,7 +479,7 @@ def main():
                                         if alarm_min < 1:
                                             alarm_min = 1
 
-                                    draw.text((4, 40), "(Setting " + set_mode + ") Hour: " + str(alarm_hour) + " Min: " + str(alarm_min), fill=BLACK, font=menu_font)
+                                    draw.text((4, 40), "(" + set_mode + ") Hour: " + str(alarm_hour) + " Min: " + str(alarm_min), fill=BLACK, font=menu_font)
                                     papirus.display(image)
                                     papirus.partial_update()
                                     count = 0
@@ -1092,7 +1113,7 @@ def main():
                         ###############
                         if GPIO.input(SW1) == False:
                             display_time()
-                            draw.text((2, 10), " Back  On  Off  Toggle", fill=BLACK, font=menu_font)
+                            draw.text((2, 10), " Back   On   Off   Toggle", fill=BLACK, font=menu_font)
                             papirus.display(image)
                             papirus.update()
                             count = 0
