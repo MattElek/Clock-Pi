@@ -48,7 +48,7 @@ to `/boot/config.txt` and reboot.
 Apart from a loud click when used for the first time after power-up, it is quite adequate for casual listening.
 
 ## Pictures
-![image](/Pictures/IMG_1.jpg?raw=true)
+![image](https://raw.githubusercontent.com/mhar9000/Clock-Pi/master/Pictures/IMG_1.JPG)
 
 ###### ToDo
 I plan to do a huge overhaul on the web interface soon.

@@ -417,17 +417,15 @@ def main():
                                     draw.text((2, 10), " Back  Toggle  Set  Status", fill=BLACK, font=menu_font)
 
                                     if alarm_set == True:
-                                        alarm_set = False
-                                        with open("/home/pi/Clock-Pi/Clock/alarm_data.csv", "w") as f:
-                                            f.seek(0)
-                                            new_text = str(alarm_hour) + "," + str(alarm_min) + ",0"
-                                            f.write(new_text)
-                                        draw.text((4, 40), "Alarm not set for " + str(alarm_hour) + ":" + str(alarm_min), fill=BLACK, font=menu_font)
-                                    elif alarm_set == False:
-                                        alarm_set = True
                                         with open("/home/pi/Clock-Pi/Clock/alarm_data.csv", "w") as f:
                                             f.seek(0)
                                             new_text = str(alarm_hour) + "," + str(alarm_min) + ",1"
+                                            f.write(new_text)
+                                        draw.text((4, 40), "Alarm not set for " + str(alarm_hour) + ":" + str(alarm_min), fill=BLACK, font=menu_font)
+                                    elif alarm_set == False:
+                                        with open("/home/pi/Clock-Pi/Clock/alarm_data.csv", "w") as f:
+                                            f.seek(0)
+                                            new_text = str(alarm_hour) + "," + str(alarm_min) + ",0"
                                             f.write(new_text)
                                         draw.text((4, 40), "Alarm set for " + str(alarm_hour) + ":" + str(alarm_min), fill=BLACK, font=menu_font)
 
@@ -505,9 +503,9 @@ def main():
                             display_time()
                             draw.text((2, 10), " Back  Alarm  Power", fill=BLACK, font=menu_font)
                             if alarm_set == True:
-                                draw.text((4, 40), "Alarm on at " + str(alarm_hour) + ":" + str(alarm_min), fill=BLACK, font=menu_font)
+                                draw.text((4, 40), "Alarm set for " + str(alarm_hour) + ":" + str(alarm_min), fill=BLACK, font=menu_font)
                             elif alarm_set == False:
-                                draw.text((4, 40), "Alarm off at " + str(alarm_hour) + ":" + str(alarm_min), fill=BLACK, font=menu_font)
+                                draw.text((4, 40), "Alarm not set for " + str(alarm_hour) + ":" + str(alarm_min), fill=BLACK, font=menu_font)
                             papirus.display(image)
                             papirus.update()
                             break
