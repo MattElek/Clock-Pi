@@ -9,56 +9,27 @@
 ############################
 from flask import abort, Flask, redirect, render_template, request, url_for
 from psutil import cpu_percent, virtual_memory
-from os import getuid, path, system
-from subprocess import check_output
+from datetime import datetime, timedelta
+from os import getuid, popen, system # , path
 from signal import signal, SIGTERM
-from datetime import datetime
 from serial import Serial
 from smbus import SMBus
 from time import sleep
 
-######################################
-#### Check if we are run as root #####
-######################################
-if getuid() != 0:
-    raise Exception("Please run script as root")
+#################################################
+##### Define class to get Raspberry Pi temp #####
+#################################################
+def get_cpu_temp():
+    with open("/sys/class/thermal/thermal_zone0/temp", "r") as tempfile:
+        cpu_temp = int(tempfile.read()) / 1000
+    cpu_temp = (cpu_temp * (9.0/5.0)) + 32.0
+    return str(cpu_temp)
 
-########################################
-##### Define class to get CPU temp #####
-########################################
-class CPUTemp:
-    def __init__(self, tempfilename = "/sys/class/thermal/thermal_zone0/temp"):
-        self.tempfilename = tempfilename
-
-    def __enter__(self):
-        self.open()
-        return self
-
-    def open(self):
-        self.tempfile = open(self.tempfilename, "r")
-
-    def read(self):
-        self.tempfile.seek(0)
-        return self.tempfile.read().rstrip()
-
-    def get_temperature(self):
-        return self.get_temperature_in_c()
-
-    def get_temperature_in_c(self):
-        tempraw = self.read()
-        return float(tempraw[:-3] + "." + tempraw[-3:])
-
-    def get_temperature_in_f(self):
-        return self.convert_c_to_f(self.get_temperature_in_c())
-
-    def convert_c_to_f(self, c):
-        return c * 9.0 / 5.0 + 32.0
-
-    def __exit__(self, type, value, traceback):
-        self.close()
-
-    def close(self):
-        self.tempfile.close()
+def get_gpu_temp():
+    with popen("/opt/vc/bin/vcgencmd measure_temp") as tempfile:
+        gpu_temp = int(tempfile.read().replace("temp=", "").split(".")[0])
+    gpu_temp = (gpu_temp * (9.0/5.0)) + 32.0
+    return str(gpu_temp)
 
 #########################################
 ##### Define class to get LM75 temp #####
@@ -98,16 +69,11 @@ class LM75(object):
 ##### Define class to get uptime #####
 ######################################
 def get_up_stats():
-    try:
-        s = check_output(["uptime"])
-        load_split = s.split("load average: ")
-        load_five = float(load_split[1].split(",")[1])
-        up = load_split[0]
-        up_pos = up.rfind(",",0,len(up)-4)
-        up = up[:up_pos].split("up ")[1]
-        return ( up , load_five )
-    except:
-        return 0
+    with open('/proc/uptime', 'r') as f:
+        uptime_seconds = float(f.readline().split()[0])
+        uptime_string = str(timedelta(seconds = uptime_seconds))
+        uptime_string = uptime_string.split(".")[0]
+    return uptime_string
 
 ###############################################
 ##### Exit cleanly if SIGTERM is received #####
@@ -123,6 +89,9 @@ def sigterm_handler(signal, frame):
 ##### Main program #####
 ########################
 
+# Check if we are run as root
+if getuid() != 0:
+    raise Exception("Please run script as root")
 
 ##### Initialize Flask #####
 app = Flask(__name__) # Create flask object
@@ -135,22 +104,14 @@ def index():
     now = datetime.now()
     timeString = now.strftime("%m/%d/%Y, %I:%M:%S %p") # Get the current time
 
-    # Get temperature data
-    with CPUTemp() as cpu_temp:
-        cpu_temp_F = cpu_temp.get_temperature_in_f() # Get CPU Temp in Fahrenheit
-        cpu_temp_C = cpu_temp.get_temperature_in_c()
-    cpu_temp_C = str(cpu_temp_C).split(".")[0]
-    ambient = str(sensor.getTempC()).split(".")[0]
-    est_temp = sensor.toFah(int(ambient) - ((int(cpu_temp_C) - int(ambient)) / 0.8))
-
     memory = virtual_memory() # Get virtual memory usage
 
     templateData = {
         "time": timeString,
-        "uptime": get_up_stats()[0], # Get uptime stats
+        "uptime": get_up_stats(), # Get uptime stats
         "sensor_temp": sensor.getTemp(), # Get LM75 temp
-        "est_temp": est_temp,
-        "cpu_temp": cpu_temp_F,
+        "gpu_temp": get_gpu_temp(),
+        "cpu_temp": get_cpu_temp(),
         "cpu_percent": str(cpu_percent()) + "%", # Get CPU percent
         "virtual_memory": str(memory.percent) + "%",
     }
@@ -163,13 +124,6 @@ def index():
 def control():
     now = datetime.now()
     timeString = now.strftime("%m/%d/%Y, %I:%M:%S %p") # Get the current time
-    # Get temperature data
-    with CPUTemp() as cpu_temp:
-        cpu_temp_F = cpu_temp.get_temperature_in_f() # Get CPU Temp in Fahrenheit
-        cpu_temp_C = cpu_temp.get_temperature_in_c()
-    cpu_temp_C = str(cpu_temp_C).split(".")[0]
-    ambient = str(sensor.getTempC()).split(".")[0]
-    est_temp = sensor.toFah(int(ambient) - ((int(cpu_temp_C) - int(ambient)) / 0.8))
 
     memory = virtual_memory() # Get virtual memory usage
 
@@ -204,10 +158,10 @@ def control():
     templateData = {
         "title": "Control Panel",
         "time": timeString,
-        "uptime": get_up_stats()[0], # Get uptime stats
+        "uptime": get_up_stats(), # Get uptime stats
         "sensor_temp": sensor.getTemp(), # Get LM75 temp
-        "est_temp": est_temp,
-        "cpu_temp": cpu_temp_F,
+        "gpu_temp": get_gpu_temp(),
+        "cpu_temp": get_cpu_temp(),
         "cpu_percent": str(cpu_percent()) + "%", # Get CPU percent
         "virtual_memory": str(memory.percent) + "%",
         "pin_twelve": pin_twelve,

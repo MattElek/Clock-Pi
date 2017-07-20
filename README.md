@@ -48,9 +48,11 @@ to `/boot/config.txt` and reboot.
 Apart from a loud click when used for the first time after power-up, it is quite adequate for casual listening.
 
 ## Pictures
+![image](/Pictures/IMG_1.jpg?raw=true)
 
-ADD PICTURES HERE
-
+###### ToDo
+I plan to do a huge overhaul on the web interface soon.
+I also may be adding one or two more features to the e ink interfaces itself, but I am mostly done with that part for now.
 
 ## License
 

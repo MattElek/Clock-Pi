@@ -198,8 +198,7 @@ systemctl enable clock.service -q
 systemctl enable web.service -q
 rm /home/pi/Clock-Pi/Music/README.md
 rm /home/pi/Clock-Pi/install.sh
-rm /home/pi/Clock-Pi/.gitignore
-rm -rf /home/pi/Clock-Pi/.git
+rm -rf /home/pi/Clock-Pi/Pictures
 chown -R pi:pi /home/pi/Clock-Pi/
 stop_spinner $?
 
