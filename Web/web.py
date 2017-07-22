@@ -10,7 +10,7 @@
 from flask import abort, Flask, redirect, render_template, request, url_for
 from psutil import cpu_percent, virtual_memory
 from datetime import datetime, timedelta
-from os import getuid, popen, system
+from os import getuid, popen, system # , path
 from signal import signal, SIGTERM
 from serial import Serial
 from smbus import SMBus
@@ -224,17 +224,9 @@ def alarm_control():
 ###########################
 ##### HomeBridge Temp #####
 ###########################
-@app.route("/api/info/lm75/")
+@app.route("/api/info/temperature/")
 def temperature():
-    return "{ " + '"value": ' + str(sensor.getTemp()) + " }"
-
-@app.route("/api/info/cpu/")
-def temperature():
-    return "{ " + '"value": ' + get_cpu_temp() + " }"
-
-@app.route("/api/info/gpu/")
-def temperature():
-    return "{ " + '"value": ' + get_gpu_temp() + " }"
+    return "{ " + '"temperature": ' + str(sensor.getTempC()) + " }"
 
 ################################
 ##### HomeBridge pin state #####
