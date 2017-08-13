@@ -421,13 +421,13 @@ def main():
                                             f.seek(0)
                                             new_text = str(alarm_hour) + "," + str(alarm_min) + ",1"
                                             f.write(new_text)
-                                        draw.text((4, 40), "Alarm not set for " + str(alarm_hour) + ":" + str(alarm_min), fill=BLACK, font=menu_font)
+                                        draw.text((4, 40), "Alarm set for " + str(alarm_hour) + ":" + str(alarm_min), fill=BLACK, font=menu_font)
                                     elif alarm_set == False:
                                         with open("/home/pi/Clock-Pi/Clock/alarm_data.csv", "w") as f:
                                             f.seek(0)
                                             new_text = str(alarm_hour) + "," + str(alarm_min) + ",0"
                                             f.write(new_text)
-                                        draw.text((4, 40), "Alarm set for " + str(alarm_hour) + ":" + str(alarm_min), fill=BLACK, font=menu_font)
+                                        draw.text((4, 40), "Alarm not set for " + str(alarm_hour) + ":" + str(alarm_min), fill=BLACK, font=menu_font)
 
                                     papirus.display(image)
                                     papirus.update()
@@ -456,11 +456,11 @@ def main():
                                     if set_mode == "hour":
                                         alarm_hour += 1
                                         if alarm_hour > 24:
-                                            alarm_hour = 24
+                                            alarm_hour = 1
                                     elif set_mode == "minute":
                                         alarm_min += 1
                                         if alarm_min > 60:
-                                            alarm_min = 60
+                                            alarm_min = 00
 
                                     draw.text((4, 40), "(" + set_mode + ") Hour: " + str(alarm_hour) + " Min: " + str(alarm_min), fill=BLACK, font=menu_font)
                                     papirus.display(image)
@@ -474,11 +474,11 @@ def main():
                                     if set_mode == "hour":
                                         alarm_hour -= 1
                                         if alarm_hour < 1:
-                                            alarm_hour = 1
+                                            alarm_hour = 24
                                     elif set_mode == "minute":
                                         alarm_min -= 1
-                                        if alarm_min < 1:
-                                            alarm_min = 1
+                                        if alarm_min < 0:
+                                            alarm_min = 60
 
                                     draw.text((4, 40), "(" + set_mode + ") Hour: " + str(alarm_hour) + " Min: " + str(alarm_min), fill=BLACK, font=menu_font)
                                     papirus.display(image)

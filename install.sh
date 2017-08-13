@@ -254,7 +254,7 @@ if [ "$INSTALL_HOMEBRIDGE" = true ] ; then
   npm install -g --unsafe-perm homebridge > /dev/null 2>&1
   stop_spinner $?
   start_spinner "Installing HomeBridge Plugins..."
-  npm install -g homebridge-http-temperature > /dev/null 2>&1
+  npm install -g homebridge-httpmultisensor > /dev/null 2>&1
   npm install -g homebridge-better-http-rgb > /dev/null 2>&1
   npm install -g homebridge-pi > /dev/null 2>&1
   stop_spinner $?
@@ -295,70 +295,73 @@ EOL
   mac_address_lower=$(/bin/cat /sys/class/net/eth0/address)
   mac_address="${mac_address_lower^^}"
   cat > /var/lib/homebridge/config.json <<EOL
-{
-  "bridge": {
-    "name": "Clock-Pi",
-    "username": "$mac_address",
-    "port": 51826,
-    "pin": "031-45-154"
-  },
-
-  "description": "More-Than-An-Alarm-Clock",
-
-  "accessories": [
   {
-    "accessory": "HTTP-RGB",
-    "name": "Pin 12",
-    "http_method": "HEAD",
-
-    "switch": {
-      "status": "http://localhost/api/info/12/",
-      "powerOn": "http://localhost/api/on/12/",
-      "powerOff": "http://localhost/api/off/12/"
-    }
-  }, {
-    "accessory": "HTTP-RGB",
-    "name": "Pin 11",
-    "http_method": "HEAD",
-
-    "switch": {
-      "status": "http://localhost/api/info/11/",
-      "powerOn": "http://localhost/api/on/11/",
-      "powerOff": "http://localhost/api/off/11/"
-    }
-  }, {
-    "accessory": "HTTP-RGB",
-    "name": "Pin 10",
-    "http_method": "HEAD",
-
-    "switch": {
-      "status": "http://localhost/api/info/10/",
-      "powerOn": "http://localhost/api/on/10/",
-      "powerOff": "http://localhost/api/off/10/"
-    }
-  }, {
-    "accessory": "HTTP-RGB",
-    "name": "Pin 9",
-    "http_method": "HEAD",
-
-    "switch": {
-      "status": "http://localhost/api/info/9/",
-      "powerOn": "http://localhost/api/on/9/",
-      "powerOff": "http://localhost/api/off/9/"
-    }
-  }, {
-    "accessory": "PiTemperature",
-    "name": "CPU Temp"
-  }, {
-    "accessory": "HttpTemperature",
-    "name": "LM75 Temp",
-    "url": "http://localhost/api/info/temperature/",
-    "http_method": "GET"
+    "bridge": {
+      "name": "Clock-Pi",
+      "username": "$mac_address",
+      "port": 51826,
+      "pin": "031-45-154"
+    },
+    "description": "More-Than-An-Alarm-Clock",
+    "accessories": [
+      {
+        "accessory": "HTTP-RGB",
+        "name": "Pin 12",
+        "http_method": "HEAD",
+        "switch": {
+          "status": "http://localhost/api/info/12/",
+          "powerOn": "http://localhost/api/on/12/",
+          "powerOff": "http://localhost/api/off/12/"
+        }
+      },
+      {
+        "accessory": "HTTP-RGB",
+        "name": "Pin 11",
+        "http_method": "HEAD",
+        "switch": {
+          "status": "http://localhost/api/info/11/",
+          "powerOn": "http://localhost/api/on/11/",
+          "powerOff": "http://localhost/api/off/11/"
+        }
+      },
+      {
+        "accessory": "HTTP-RGB",
+        "name": "Pin 10",
+        "http_method": "HEAD",
+        "switch": {
+          "status": "http://localhost/api/info/10/",
+          "powerOn": "http://localhost/api/on/10/",
+          "powerOff": "http://localhost/api/off/10/"
+        }
+      },
+      {
+        "accessory": "HTTP-RGB",
+        "name": "Pin 9",
+        "http_method": "HEAD",
+        "switch": {
+          "status": "http://localhost/api/info/9/",
+          "powerOn": "http://localhost/api/on/9/",
+          "powerOff": "http://localhost/api/off/9/"
+        }
+      },
+      {
+        "accessory": "PiTemperature",
+        "name": "CPU Temp"
+      },
+      {
+        "accessory": "HttpMultisensor",
+        "name": "LM75 Temp",
+        "type": "CurrentTemperature",
+        "manufacturer": "Default",
+        "model": "Default",
+        "serial": "Default",
+        "url": "http://localhost/api/info/lm75/",
+        "http_method": "GET",
+        "debug": false
+      }
+    ],
+    "platforms": []
   }
-  ],
-
-  "platforms": []
-}
 EOL
   systemctl daemon-reload
   systemctl enable homebridge -q > /dev/null 2>&1
