@@ -1,5 +1,8 @@
 # Clock-Pi
+
 A Raspberry Pi, E Ink Display and an Arduino.
+
+## THIS PROJECT IS NO LONGER BEING MANTAINED
 
 This project was born out of the need to get up in the morning. I need something loud, so my first thought was to play an audio file from a [Raspberry Pi](https://www.raspberrypi.org). I also had a [Papirus E Ink Display](https://www.pi-supply.com/product/papirus-epaper-eink-screen-hat-for-raspberry-pi/) lying around, and I went from there. This is the first project I have put on GitHub so constructive criticism is welcome.
 
