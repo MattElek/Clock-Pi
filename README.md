@@ -27,12 +27,12 @@ It is a combination of 3 python programs, Airplay, HomeKit, and Netatalk. I adde
 I absolutely LOVE it when an install is easy and painless. I have tried very hard to create that, so here is a one-liner that I made. Copy and paste it into your Raspberry Pi terminal, hit enter, select some options, and let it do it's thing.
 
 ```Shell
-curl -sSL https://git.io/vHoBc | sudo bash
+curl -sSL https://git.io/fAbY4 | sudo bash
 ```
 
 Wire up your relays to pins 12, 11, 10, and 9 on your Arduino, with the relays that the speakers are connected to wired to pin 12. Also, if you have a nightlight or something that you want to be able to turn off automatically after 1 or 2 hours, connect it to pin 11. Connect a button to pin 8 to be used as the reboot button.
 
-Finally, connect an Arduino to your computer and load [arduino_program.ino](https://raw.githubusercontent.com/mhar9000/Clock-Pi/master/arduino_program.ino).
+Finally, connect an Arduino to your computer and load [arduino_program.ino](https://raw.githubusercontent.com/MattElekHarris/Clock-Pi/master/arduino_program.ino).
 
 Thats it!
 
@@ -51,7 +51,7 @@ to `/boot/config.txt` and reboot.
 Apart from a loud click when used for the first time after power-up, it is quite adequate for casual listening.
 
 ## Pictures
-![image](https://raw.githubusercontent.com/mhar9000/Clock-Pi/master/Pictures/IMG_1.JPG)
+![image](https://raw.githubusercontent.com/MattElekHarris/Clock-Pi/master/Pictures/IMG_1.JPG)
 
 ###### ToDo
 I plan to do a huge overhaul on the web interface soon.
