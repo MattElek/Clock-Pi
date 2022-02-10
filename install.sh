@@ -152,7 +152,7 @@ stop_spinner $?
 
 start_spinner "Installing Main Script and Web Backend..."
 bash -c '[ -d /home/pi/Clock-Pi/ ] && rm -rf /home/pi/Clock-Pi/'
-git clone https://github.com/MattElekHarris/Clock-Pi.git -q
+git clone https://github.com/MattElek/Clock-Pi.git -q
 cat > /lib/systemd/system/arduino_shutdown.service <<EOL
 [Unit]
 Description=Arduino Shutdown Button
